@@ -1,3 +1,7 @@
 5/12/13
 Alessio: Abbiamo creato le VM e impostato CLION e Git.
+Cose da fare oggi:
+Creazione navicella.
+Gestione Movimento.
+
 
