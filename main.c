@@ -1,2 +1,8 @@
-viva i piedi mi piacciono i piedi
+#include <stdio.h>
+
+int main() {
+    printf("Hello, World!\n");
+    return 0;
+}
+
 
