@@ -2,7 +2,9 @@
 #define SO_BASATO_NAVICELLA_H
 
 
-
+char SpriteNavicella[6][6]={"---
+                            | >
+---};
 /*
 ---
  | >

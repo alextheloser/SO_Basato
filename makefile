@@ -1,5 +1,5 @@
-SpaceDefender: navicella.o main.o
-	gcc -o SpaceDefender navicella.o main.o
+SpaceDefender: main.o navicella.o
+	gcc -o SpaceDefender main.o navicella.o
 
 navicella.o: navicella.c navicella.h
 	gcc -c -o navicella.o navicella.c

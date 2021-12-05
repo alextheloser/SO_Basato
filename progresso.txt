@@ -1,5 +1,10 @@
 5/12/13
 Alessio: Abbiamo creato le VM e impostato CLION e Git.
+Cose fatte oggi:
+Abbiamo capito dove cazzo era l'errore dei .h
+Abbiamo sconfitto la prima battaglia con il Make.
+
+
 Cose da fare oggi:
 Creazione navicella.
 Gestione Movimento.
