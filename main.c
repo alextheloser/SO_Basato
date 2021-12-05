@@ -1,4 +1,10 @@
 #include <stdio.h>
+#include <ncurses.h>
+#include <stdlib.h>
+#include <signal.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/wait.h>
 #include "navicella.h"
 
 int main() {
