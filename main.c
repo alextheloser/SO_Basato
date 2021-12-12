@@ -12,7 +12,7 @@
 #define MAXX 80
 #define MAXY 24
 
-enum identity{Navicella, Nemico, NemicoAvanzato};
+typedef enum {Navicella, Nemico, NemicoAvanzato}identity;
 
 typedef struct{
     identity i;
@@ -67,7 +67,7 @@ int main() {
                     navicella(filedes[1]);
                 default:
                     close(filedes[1]);
-                    //controllo(filedes[0]);
+                    controllo(filedes[0]);
             }
     }
 
@@ -147,12 +147,21 @@ void controllo(int pipein){
         read(pipein, &valore_letto, sizeof(valore_letto));
         if(valore_letto.i==Nemico){
             if(nemico.x >= 0 ){
-                mvaddch(nemico.x, nemico.y, '');
+
+                mvprintw(nemico.y, nemico.x, "     \n     \n     ");
             }
             nemico=valore_letto;
         }
-        else
-
-    }
+        else{
+            if(navicella.x >= 0 ){
+                mvprintw(navicella.y, navicella.x, "   \n    \n   \n");
+                //mvprintw(navicella.y, navicella.x, "PISELLO");
+            }
+            navicella=valore_letto;
+        }
+        mvprintw(valore_letto.y, valore_letto.x, valore_letto.sprite);
+        curs_set(0);
+        refresh();
+    } while(navicella.x != nemico.x || navicella.y != nemico.y);
 }
 
