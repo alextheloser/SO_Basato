@@ -1,3 +1,6 @@
+#include "engine.h"
+#include "navicella.h"
+
 void navicella(int pipeout){
     Position pos_navicella;
     pos_navicella.x=1;
@@ -5,8 +8,6 @@ void navicella(int pipeout){
     pos_navicella.sprite=SpriteNavicella;
 
     pipe(pipeout, &pos_navicella, sizeof(pos_navicella));
-
-    //aggiungo navicella
 
     while(1) {
         char c;
@@ -22,6 +23,10 @@ void navicella(int pipeout){
                 }
                 break
         }
-        write(pipeout,&pos_guardia,sizeof(pos_guardia));
+        write(pipeout,&pos_navicella,sizeof(pos_navicella));
     }
+}
+
+void StampaNavicella(){
+    printf("%s", SpriteNavicella);
 }
