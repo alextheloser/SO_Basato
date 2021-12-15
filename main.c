@@ -7,40 +7,44 @@
 #include <sys/wait.h>
 #include <time.h>
 
-/*#define KEY_UP 65
-#define KEY_DOWN 66*/
 #define MAXX 80
 #define MAXY 24
+#define PASSO 1
 
 typedef enum {Navicella, Nemico, NemicoAvanzato}identity;
 
 typedef struct{
-    identity i;
     int x;
     int y;
-    char* sprite;
+    identity i;
 }Position;
 
 //Ciao andrea sto provando a fare un commit da un'altra macchina virtuale :)
+//Ciao ale sto sitemando il movimento della navicella 8==)
 void navicella(int pipeout);
+void nemiciPrimoLivello(int pipeout, int x, int y);
+void controllo(int pipein);
 
-char SpriteNavicella[]={"---\n | >\n---\n"};
+char SpriteNavicella[6][6]= {
+        "---",
+        " | >",
+        "---"};
 
-char SpriteNemicoBase[]={"  |.... \n< OO \n  |____"};
-/*
----
- | >
----
-*/
-
+char SpriteNemicoBase[3][3]={
+        "|--",
+        "<OO",
+        "|--"};
 
 int main() {
     int filedes[2];
     pid_t pid_navicella, pid_nemici;
+
     initscr();
     noecho();
-    srand((int)time(0));
+    keypad(stdscr, 1);
     curs_set(0);
+    srand((int)time(0));
+
 
     if(pipe(filedes) == -1){
         perror("Errore nella creazione della pipe!");
@@ -55,7 +59,7 @@ int main() {
             exit(1);
         case 0:
             close(filedes[0]);
-            //nemici(filedes[1]);
+            nemiciPrimoLivello(filedes[1], MAXX, MAXY);
         default:
             pid_navicella=fork();
             switch(pid_navicella)
@@ -82,21 +86,22 @@ void navicella(int pipeout){
     Position pos_navicella;
     pos_navicella.x=1;
     pos_navicella.y=1;
-    pos_navicella.sprite=SpriteNavicella;
     pos_navicella.i=Navicella;
 
     write(pipeout, &pos_navicella, sizeof(pos_navicella));
 
+    char c;
+
     while(1) {
-        char c;
-        switch(c=getch()){
+        c=getch();
+        switch(c){
             case KEY_UP:
                 if(pos_navicella.y>0){
                     pos_navicella.y--;
                 }
                 break;
             case KEY_DOWN:
-                if(pos_navicella.y<MAXY-1){
+                if(pos_navicella.y<MAXY-3){
                     pos_navicella.y++;
                 }
                 break;
@@ -109,33 +114,32 @@ void nemiciPrimoLivello(int pipeout, int x, int y){
     Position pos_nemico;
     pos_nemico.x=x;
     pos_nemico.y=y;
-    pos_nemico.sprite=SpriteNemicoBase;
     pos_nemico.i=Nemico;
-    int r, dirx=1, diry=1;
+    int r, dirx, diry;
 
     write(pipeout, &pos_nemico, sizeof(pos_nemico));
 
     while(1){
         r=random();
         if(r<RAND_MAX/2)
-            dx=1;
+            dirx=1;
         else
-            dx=-1;
-        if(pos_nemico.x+dx<1 || pos_nemico.x+dx>=MAXX)
-            dx=-dx;
-        pos_nemico.x+=dx;
+            dirx=-1;
+        if(pos_nemico.x+dirx<1 || pos_nemico.x+dirx>=MAXX)
+            dirx=-dirx;
+        pos_nemico.x+=dirx;
 
         r=random();
         if(r<RAND_MAX/2)
-            dy=PASSO;
+            diry=PASSO;
         else
-            dy=-PASSO;
-        if(pos_nemico.y+dy<1 || pos_nemico.y+dy>=MAXY)
-            dy=-dy;
-        pos_nemico.y+=dy;
+            diry=-PASSO;
+        if(pos_nemico.y+diry<1 || pos_nemico.y+diry>=MAXY)
+            diry=-diry;
+        pos_nemico.y+=diry;
 
         write(pipeout,&pos_nemico,sizeof(pos_nemico));
-        usleep(100000);
+        usleep(500000);
     }
 }
 
@@ -143,25 +147,36 @@ void controllo(int pipein){
     Position nemico, navicella, valore_letto;
     navicella.x=-1;
     nemico.x=-1;
+    int i;
 
     do{
         read(pipein, &valore_letto, sizeof(valore_letto));
         if(valore_letto.i==Nemico){
             if(nemico.x >= 0 ){
-
-                mvprintw(nemico.y, nemico.x, "     \n     \n     ");
+                for(i=0; i<3; i++){
+                    mvprintw(nemico.y+i, nemico.x, "   ");
+                }
             }
             nemico=valore_letto;
         }
         else{
             if(navicella.x >= 0 ){
-                mvprintw(navicella.y, navicella.x, "   \n    \n   \n");
-                //mvprintw(navicella.y, navicella.x, "PISELLO");
+                for(i=0; i<3; i++){
+                    mvprintw(navicella.y+i, navicella.x, "   ");
+                }
             }
             navicella=valore_letto;
         }
-        mvprintw(valore_letto.y, valore_letto.x, valore_letto.sprite);
-        curs_set(0);
+        if(valore_letto.i==Nemico){
+            for(i=0; i<3; i++){
+                mvprintw(nemico.y+i, nemico.x, SpriteNemicoBase[i]);
+            }
+        }
+        else{
+            for(i=0; i<3; i++){
+                mvprintw(navicella.y+i, navicella.x, SpriteNavicella[i]);
+            }
+        }
         refresh();
     } while(navicella.x != nemico.x || navicella.y != nemico.y);
 }

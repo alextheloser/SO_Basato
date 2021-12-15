@@ -8,7 +8,7 @@
 
 void navicella(int pipeout);
 
-char SpriteNavicella[6][6]={"---\n", " | >\n", "---\n"};
+char SpriteNavicella[3][4]={"---\n", " | >\n", "---\n"};
 /*
 ---
  | >
