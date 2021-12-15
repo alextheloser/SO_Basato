@@ -10,7 +10,7 @@
 #define MAXX 80
 #define MAXY 24
 #define PASSO 1
-
+/*
 typedef enum {Navicella, Nemico, NemicoAvanzato}identity;
 
 typedef struct{
@@ -41,7 +41,7 @@ int main() {
 
     initscr();
     noecho();
-    keypad(stdscr, 1);
+    keypad(stdscr, 1); //funzione per leggere i tasti della tastiera
     curs_set(0);
     srand((int)time(0));
 
@@ -179,5 +179,57 @@ void controllo(int pipein){
         }
         refresh();
     } while(navicella.x != nemico.x || navicella.y != nemico.y);
-}
+}*/
 
+//inizia qui
+struct posizione {
+    int x;        // coordinata x
+    int y;        // coordinata y
+};
+
+char gameover[5][25] = {
+        " _____ ___ _   _ _____ ",
+        "|  ___|_ _| \\ | | ____|",
+        "| |_   | ||  \\| |  _|  ",
+        "|  _|  | || |\\  | |___ ",
+        "|_|   |___|_| \\_|_____|"};
+
+int main(){
+    initscr();    /* Inizializza lo schermo */
+    noecho();     /* Disabilita la visualizzazione dei tasti premuti */
+    keypad(stdscr, 1);  /* Abilita la gestione dei tasti freccia */
+    curs_set(0);  /* Nasconde il cursore */
+    struct posizione oggetto = { 1, 1 };
+    int i;
+    for(i=0; i<5; i++){
+        mvprintw(oggetto.y+i, oggetto.x, gameover[i]);
+    }
+    refresh();
+    while(true){
+        int c = getch();
+        for(i=0; i<5; i++){
+            mvprintw(oggetto.y+i, oggetto.x, "                         ");
+        }
+        switch(c) {
+            case KEY_UP:
+                if(oggetto.y > 0) oggetto.y -= 1;
+                break;
+            case KEY_DOWN:
+                if(oggetto.y < MAXY - 5) oggetto.y += 1;
+                break;
+            case KEY_LEFT:
+                if(oggetto.x > 0) oggetto.x -= 1;
+                break;
+            case KEY_RIGHT:
+                if(oggetto.x < MAXX - 25) oggetto.x += 1;
+                break;
+            case 113: /* Tasto 'q' */
+                endwin();
+                exit(0);
+        }
+        for(i=0; i<5; i++){
+            mvprintw(oggetto.y+i, oggetto.x, gameover[i]);
+        }
+        refresh();
+    }
+}
