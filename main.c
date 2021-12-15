@@ -21,6 +21,7 @@ typedef struct{
 
 //Ciao andrea sto provando a fare un commit da un'altra macchina virtuale :)
 //Ciao ale sto sitemando il movimento della navicella 8==)
+//pisellopalleabnormi
 void navicella(int pipeout);
 void nemiciPrimoLivello(int pipeout, int x, int y);
 void controllo(int pipein);
