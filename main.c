@@ -21,6 +21,7 @@ typedef struct{
     char* sprite;
 }Position;
 
+//Ciao andrea sto provando a fare un commit da un'altra macchina virtuale :)
 void navicella(int pipeout);
 
 char SpriteNavicella[]={"---\n | >\n---\n"};
