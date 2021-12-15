@@ -30,14 +30,20 @@ char SpriteNavicella[6][6]= {
         " | >",
         "---"};
 
-char SpriteNemicoBase[3][3]={
-        "|--",
+char SpriteNemicoBase[4][4]={
+        " /\\",
         "<OO",
-        "|--"};
+        " \\/"};
+  //yes concordo un array di piedi
+  //feetallora direi di fare un array di pid delle navicelle nemiche
+  //fanno cogmpagnia lasciamoli
+  //mmmh però come facciamo per la generazione dei processi?
+  //eja, comunque ho fatto, ora provo a vedere se i due processi li gestisce così
+  //vedo solo una navicella
 
 int main() {
-    int filedes[2];
-    pid_t pid_navicella, pid_nemici;
+    int filedes[2], numNemici=2;
+    pid_t pid_navicella, pid_nemici[numNemici];
 
     initscr();
     noecho();
@@ -51,32 +57,44 @@ int main() {
         _exit(1);
     }
 
-    pid_nemici=fork();
-    switch(pid_nemici)
+    pid_nemici[0]=fork();
+    switch(pid_nemici[0])
     {
         case -1:
             perror("Errore nell'esecuzione della fork.");
             exit(1);
         case 0:
             close(filedes[0]);
-            nemiciPrimoLivello(filedes[1], MAXX/2, MAXY/2);
+            nemiciPrimoLivello(filedes[1], rand()%MAXX, rand()%MAXY);
         default:
-            pid_navicella=fork();
-            switch(pid_navicella)
+            pid_nemici[1]=fork();
+            switch(pid_nemici[1])
             {
                 case -1:
                     perror("Errore nell'esecuzione della fork.");
-                    _exit(1);
+                    exit(1);
                 case 0:
                     close(filedes[0]);
-                    navicella(filedes[1]);
+                    nemiciPrimoLivello(filedes[1], rand()%MAXX, rand()%MAXY);
                 default:
-                    close(filedes[1]);
-                    controllo(filedes[0]);
+                    pid_navicella=fork();
+                    switch(pid_navicella)
+                        {
+                            case -1:
+                                perror("Errore nell'esecuzione della fork.");
+                                _exit(1);
+                            case 0:
+                                close(filedes[0]);
+                                navicella(filedes[1]);
+                            default:
+                                close(filedes[1]);
+                                controllo(filedes[0]);
+                        }
             }
     }
 
-    kill(pid_nemici,1);
+    kill(pid_nemici[0],1);
+    kill(pid_nemici[1],1);
     kill(pid_navicella,1);
     endwin();
     return 0;
@@ -139,7 +157,7 @@ void nemiciPrimoLivello(int pipeout, int x, int y){
         pos_nemico.y+=diry;
 
         write(pipeout,&pos_nemico,sizeof(pos_nemico));
-        usleep(500000);
+        usleep(1000000);
     }
 }
 
