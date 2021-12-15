@@ -59,7 +59,7 @@ int main() {
             exit(1);
         case 0:
             close(filedes[0]);
-            nemiciPrimoLivello(filedes[1], MAXX, MAXY);
+            nemiciPrimoLivello(filedes[1], MAXX/2, MAXY/2);
         default:
             pid_navicella=fork();
             switch(pid_navicella)
@@ -154,7 +154,7 @@ void controllo(int pipein){
         if(valore_letto.i==Nemico){
             if(nemico.x >= 0 ){
                 for(i=0; i<3; i++){
-                    mvprintw(nemico.y+i, nemico.x, "   ");
+                    mvprintw(nemico.y+i, nemico.x, "      ");
                 }
             }
             nemico=valore_letto;
@@ -167,6 +167,7 @@ void controllo(int pipein){
             }
             navicella=valore_letto;
         }
+
         if(valore_letto.i==Nemico){
             for(i=0; i<3; i++){
                 mvprintw(nemico.y+i, nemico.x, SpriteNemicoBase[i]);
