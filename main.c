@@ -24,7 +24,7 @@ void navicella(int pipeout);
 void nemiciPrimoLivello(int pipeout, int x, int y, int idNemico);
 void controllo(int pipein);
 
-int numNemici=2;
+int numNemici=10;
 
 char SpriteNavicella[6][6]= {
         "---",
@@ -37,7 +37,7 @@ char SpriteNemicoBase[4][4]={
         " /\\"};
 
 int main() {
-    int filedes[2], idNemico=-1;
+    int filedes[2], i;
     pid_t pid_navicella, pid_nemici[numNemici];
 
     initscr();
@@ -52,42 +52,30 @@ int main() {
         _exit(1);
     }
 
-    pid_nemici[0]=fork();
-    switch(pid_nemici[0])
-    {
+    for(i=0; i<numNemici; i++){
+        pid_nemici[i]=fork();
+        switch(pid_nemici[i]){
+            case -1:
+                perror("Errore nell'esecuzione della fork!");
+                exit(1);
+            case 0:
+                close(filedes[0]);
+                nemiciPrimoLivello(filedes[1], 11+4*i, 1+3*i, i);
+            default:
+                break;
+        }
+    }
+    pid_navicella=fork();
+    switch(pid_navicella){
         case -1:
-            perror("Errore nell'esecuzione della fork.");
+            perror("Errore nell'esecuzione della fork!");
             exit(1);
         case 0:
             close(filedes[0]);
-            idNemico++;
-            nemiciPrimoLivello(filedes[1], 34, 12, 0);
+            navicella(filedes[1]);
         default:
-            pid_nemici[1]=fork();
-            switch(pid_nemici[1])
-            {
-                case -1:
-                    perror("Errore nell'esecuzione della fork.");
-                    exit(1);
-                case 0:
-                    close(filedes[0]);
-                    idNemico++;
-                    nemiciPrimoLivello(filedes[1], 67, 1, 1);
-                default:
-                    pid_navicella=fork();
-                    switch(pid_navicella)
-                        {
-                            case -1:
-                                perror("Errore nell'esecuzione della fork.");
-                                _exit(1);
-                            case 0:
-                                close(filedes[0]);
-                                navicella(filedes[1]);
-                            default:
-                                close(filedes[1]);
-                                controllo(filedes[0]);
-                        }
-            }
+            close(filedes[1]);
+            controllo(filedes[0]);
     }
 
     kill(pid_nemici[0],1);
@@ -100,7 +88,7 @@ int main() {
 void navicella(int pipeout){
     Position pos_navicella;
     pos_navicella.x=1;
-    pos_navicella.y=1;
+    pos_navicella.y=0;
     pos_navicella.i=Navicella;
 
     write(pipeout, &pos_navicella, sizeof(pos_navicella));
@@ -195,4 +183,8 @@ void controllo(int pipein){
         refresh();
 
     } while(1);
+}
+
+int rng(int max, int min){
+    return min+rand()%(max-min+1);
 }
