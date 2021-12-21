@@ -37,7 +37,7 @@ char SpriteNemicoBase[4][4]={
         " /\\"};
 
 int main() {
-    int filedes[2], idNemico=0;
+    int filedes[2], idNemico=-1;
     pid_t pid_navicella, pid_nemici[numNemici];
 
     initscr();
@@ -60,8 +60,8 @@ int main() {
             exit(1);
         case 0:
             close(filedes[0]);
-            nemiciPrimoLivello(filedes[1], 34, 12, idNemico);
             idNemico++;
+            nemiciPrimoLivello(filedes[1], 34, 12, 0);
         default:
             pid_nemici[1]=fork();
             switch(pid_nemici[1])
@@ -71,8 +71,8 @@ int main() {
                     exit(1);
                 case 0:
                     close(filedes[0]);
-                    nemiciPrimoLivello(filedes[1], 67, 1, idNemico);
                     idNemico++;
+                    nemiciPrimoLivello(filedes[1], 67, 1, 1);
                 default:
                     pid_navicella=fork();
                     switch(pid_navicella)
