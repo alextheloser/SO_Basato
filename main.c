@@ -40,7 +40,7 @@ char SpriteNemicoBase[4][4]={
         " \\/"};
 
 int main() {
-    int filedes[2], i, maxx, maxy;
+    int filedes[2], i, j=0, maxx, maxy, x_nemici, y_nemici;
     pid_t pid_navicella, pid_nemici[numNemici];
 
     initscr();
@@ -49,7 +49,8 @@ int main() {
     curs_set(0);
     getmaxyx(stdscr, maxy, maxx);
     srand((int)time(NULL));
-
+    x_nemici=maxx-4;
+    y_nemici=2;
 
     if(pipe(filedes) == -1){
         perror("Errore nella creazione della pipe!");
@@ -64,7 +65,14 @@ int main() {
                 exit(1);
             case 0:
                 close(filedes[0]);
-                nemiciPrimoLivello(filedes[1], 11+4*i, 1+3*i, i, maxx, maxy);
+                nemiciPrimoLivello(filedes[1], x_nemici, y_nemici, i, maxx, maxy);
+                y_nemici=(y_nemici+4)%maxy;
+                j++;
+                if(j>5){
+                   x_nemici-=4;
+                   y_nemici=2;
+                   j=0;
+                }
             default:
                 break;
         }
