@@ -16,6 +16,8 @@ typedef enum {Navicella, Nemico, NemicoAvanzato, Missile, Bomba}identity;
 typedef struct{
     int x;
     int y;
+    int x_missile[2]; //i nemici useranno solo la prima locazione (hanno solo una bomba ciascuno)
+    int y_missile[2];
     identity i;
     int id; //solo per i nemici
 }Position;
@@ -23,7 +25,7 @@ typedef struct{
 void navicella(int pipeout, int maxx, int maxy);
 void nemiciPrimoLivello(int pipeout, int x, int y, int idNemico, int maxx, int maxy);
 void controllo(int pipein, int maxx, int maxy);
-void missile();
+void missile(int pipeout, int navx, int navy);
 
 int numNemici=10;
 
@@ -43,6 +45,7 @@ int main() {
 
     initscr();
     noecho();
+    cbreak();
     keypad(stdscr, 1); //funzione per leggere i tasti della tastiera
     curs_set(0);
     srand((int)time(NULL));
@@ -112,7 +115,7 @@ void navicella(int pipeout, int maxx, int maxy){
     pos_navicella.x=1;
     pos_navicella.y=2;
     pos_navicella.i=Navicella;
-    pid_t pid_missile;
+
 
     write(pipeout, &pos_navicella, sizeof(pos_navicella));
 
@@ -132,15 +135,8 @@ void navicella(int pipeout, int maxx, int maxy){
                 }
                 break;
             case ' ':
-                pid_missile=fork();
-                switch(pid_missile){
-                    case -1:
-                        perror("Errore nell'esecuzione della fork!");
-                        exit(1);
-                    case 0:
-                        missile();
-
-                }
+                missile(pipeout,pos_navicella.x,pos_navicella.y);
+                break;
         }
         write(pipeout,&pos_navicella,sizeof(pos_navicella));
     }
@@ -197,8 +193,8 @@ void controllo(int pipein, int maxx, int maxy){
         nemico[i].x=-1;
     }
     //stampa vite
-    mvprintw(0, 1, "Vite: %d", vite);
-    for(i=0; i<maxx; i++){
+    mvprintw(0, 0, "Vite: %d", vite);
+    for(i=1; i<maxx; i++){
         mvprintw(1, i, "-");
     }
     do{
@@ -239,4 +235,28 @@ void controllo(int pipein, int maxx, int maxy){
         refresh();
 
     } while(1);
+}
+
+void missile(int pipeout, int navx, int navy){
+    Position pos_missile;
+    pos_missile.x=navx;
+    pos_missile.y=navy;
+    pos_missile.i=Missile;
+    pid_t pid_missile;
+    write(pipeout, &pos_missile, sizeof(pos_missile));
+    pid_missile=fork();
+    while(1) {
+        switch (pid_missile) {
+            case -1:
+                perror("Errore nell'esecuzione della fork!");
+                exit(1);
+                break;
+            case 0:
+                break;
+        }
+        write(pipeout, &pos_missile, sizeof(pos_missile));
+    }
+    kill(pid_missile,1);
+    //printf("Spero mi dia qualche indicazione");
+    //break;
 }
