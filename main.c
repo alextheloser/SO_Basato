@@ -27,7 +27,7 @@ typedef struct{
 void navicella(int pipeout, int maxx, int maxy);
 void nemiciPrimoLivello(int pipeout, int x, int y, int idNemico, int maxx, int maxy);
 void controllo(int pipein, int maxx, int maxy);
-void missile(int pipeout, int maxx, int maxy, int navx, int navy, int *missileVivo);
+void missile(int pipeout, int maxx, int maxy, int navx, int navy, int pidMissile, int *isMissileVivo);
 
 int numNemici=10;
 
