@@ -140,6 +140,8 @@ void navicella(int pipeout, int maxx, int maxy){
                 }
                 break;
             case ' ':
+                mvprintw(maxy/2,maxx/2, "palle");
+
                 if (isMissileVivo == 0) {
                     isMissileVivo=1;
                     pid_missile = fork();
@@ -148,8 +150,7 @@ void navicella(int pipeout, int maxx, int maxy){
                             perror("Errore nell'esecuzione della fork!");
                             exit(1);
                         case 0:
-                            missile(pipeout, maxx, maxy, pos_navicella.x, pos_navicella.y, &isMissileVivo);
-                            kill(pid_missile, 1);
+                            missile(pipeout, maxx, maxy, pos_navicella.x, pos_navicella.y, pid_missile, &isMissileVivo);
                         default:
                             break;
                     }
@@ -267,7 +268,7 @@ void controllo(int pipein, int maxx, int maxy){
     } while(1);
 }
 
-void missile(int pipeout, int maxx, int maxy, int navx, int navy, int *missileVivo){
+void missile(int pipeout, int maxx, int maxy, int navx, int navy, int pidMissile, int *isMissileVivo){
 
     Position pos_missile;
     pos_missile.x=4+navx;
@@ -276,15 +277,16 @@ void missile(int pipeout, int maxx, int maxy, int navx, int navy, int *missileVi
     int diry=1;
 
     write(pipeout, &pos_missile, sizeof(pos_missile));
-    do{
+    while(1){
         if(pos_missile.y+diry>maxy || pos_missile.y+diry<3) {diry=-diry;}
         pos_missile.y+=diry;
         pos_missile.x++;
         write(pipeout, &pos_missile, sizeof(pos_missile));
-        usleep(100000);
-    }while(pos_missile.x>maxx);
-    //return;
-    //printf("Spero mi dia qualche indicazione");
-    //break;
+        usleep(10000);
+        if(pos_missile.x>maxx){
+           //mvprintw(maxy/2,maxx/2, "palle");
+            //exit(1);
+        }
+    }
 
 }
