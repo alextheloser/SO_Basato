@@ -257,6 +257,7 @@ void controllo(int pipein, int maxx, int maxy){
                 mvaddch(missile.y, missile.x,SpriteMissile);
                 break;
         }
+        //stampa vite
         mvprintw(0, 1, "Vite: %d", vite);
         for(i=0; i<maxx; i++){
             mvprintw(1, i, "-");
@@ -275,16 +276,10 @@ void missile(int pipeout, int maxx, int maxy, int navx, int navy, int *missileVi
     int diry=1;
 
     write(pipeout, &pos_missile, sizeof(pos_missile));
-    pid_missile=fork();
-    while(1) {
-        switch (pid_missile) {
-            case -1:
-                perror("Errore nell'esecuzione della fork!");
-                exit(1);
-                break;
-            case 0:
-                break;
-        }
+    do{
+        if(pos_missile.y+diry>maxy || pos_missile.y+diry<3) {diry=-diry;}
+        pos_missile.y+=diry;
+        pos_missile.x++;
         write(pipeout, &pos_missile, sizeof(pos_missile));
         usleep(100000);
     }while(pos_missile.x>maxx);
