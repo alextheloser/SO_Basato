@@ -16,8 +16,6 @@ typedef enum {Navicella, Nemico, NemicoAvanzato, Missile, Bomba}identity;
 typedef struct{
     int x;
     int y;
-    int x_missile[2]; //i nemici useranno solo la prima locazione (hanno solo una bomba ciascuno)
-    int y_missile[2];
     identity i;
     int id; //solo per i nemici
 }Position;
@@ -40,17 +38,18 @@ char SpriteNemicoBase[4][4]={
         " \\/"};
 
 int main() {
-    int filedes[2], i, j=0, maxx, maxy, x_nemici, y_nemici;
+    int filedes[2], i, j=0, maxx, maxy, x_nemici, y_nemici, numColonne=1;
     pid_t pid_navicella, pid_nemici[numNemici];
 
     initscr();
     noecho();
     keypad(stdscr, 1); //funzione per leggere i tasti della tastiera
     curs_set(0);
-    getmaxyx(stdscr, maxy, maxx);
     srand((int)time(NULL));
-    x_nemici=maxx-4;
-    y_nemici=2;
+
+    getmaxyx(stdscr, maxy, maxx);
+    x_nemici=maxx-5;
+    y_nemici=3;
 
     if(pipe(filedes) == -1){
         perror("Errore nella creazione della pipe!");
@@ -66,15 +65,19 @@ int main() {
             case 0:
                 close(filedes[0]);
                 nemiciPrimoLivello(filedes[1], x_nemici, y_nemici, i, maxx, maxy);
-                y_nemici=(y_nemici+4)%maxy;
-                j++;
-                if(j>5){
-                   x_nemici-=4;
-                   y_nemici=2;
-                   j=0;
-                }
             default:
                 break;
+        }
+        j++;
+        y_nemici=(y_nemici+6)%maxy;
+        if(j>9){
+            j=0;
+            x_nemici-=4;
+            if(numColonne%2==0)
+                y_nemici=3;
+            else
+                y_nemici=6;
+            numColonne++;
         }
     }
     pid_navicella=fork();
@@ -98,6 +101,12 @@ int main() {
     return 0;
 }
 
+/**
+ * Funzione che si occupa di generare le coordinate della navicella
+ * @param pipeout File descriptor in scrittura della pipe
+ * @param maxx Massimo valore delle X sullo schermo
+ * @param maxy Massimo valore delle Y sullo schermo
+ */
 void navicella(int pipeout, int maxx, int maxy){
     Position pos_navicella;
     pos_navicella.x=1;
@@ -137,40 +146,49 @@ void navicella(int pipeout, int maxx, int maxy){
     }
 }
 
+/**
+ * Funzione che si occupa di generare le coordinate di una navicella nemica
+ * @param pipeout File descriptor in scrittura della pipe
+ * @param x Coordinata X iniziale del nemico
+ * @param y Coordinata Y iniziale del nemico
+ * @param idNemico Numero identificativo della navicella nemica
+ * @param maxx Massimo valore delle X sullo schermo
+ * @param maxy Massimo valore delle Y sullo schermo
+ */
 void nemiciPrimoLivello(int pipeout, int x, int y, int idNemico, int maxx, int maxy){
     Position pos_nemico;
     pos_nemico.x=x;
     pos_nemico.y=y;
     pos_nemico.i=Nemico;
     pos_nemico.id=idNemico;
-    int r, dirx, diry;
+    int r=1, dirx, diry;
 
     write(pipeout, &pos_nemico, sizeof(pos_nemico));
     //rifare movimento delle navicelle nemiche!!!!!
     while(1){
-        r=random();
-        if(r<RAND_MAX/2)
-            dirx=1;
-        else
-            dirx=-1;
-        if(pos_nemico.x+dirx<3 || pos_nemico.x+dirx>=maxx)
-            dirx=-dirx;
+        dirx=-PASSO;
         pos_nemico.x+=dirx;
 
-        r=random();
-        if(r<RAND_MAX/2)
+        if(r%2==0)
             diry=PASSO;
         else
             diry=-PASSO;
         if(pos_nemico.y+diry<2 || pos_nemico.y+diry>=maxy)
             diry=-diry;
         pos_nemico.y+=diry;
+        r++;
 
         write(pipeout,&pos_nemico,sizeof(pos_nemico));
         usleep(1000000);
     }
 }
 
+/**
+ * Funzione che si occupa della stampa dei vari elementi a schermo e delle collisioni
+ * @param pipein File descriptor in lettura della pipe
+ * @param maxx Massimo valore delle X sullo schermo
+ * @param maxy Massimo valore delle Y sullo schermo
+ */
 void controllo(int pipein, int maxx, int maxy){
     Position nemico[numNemici], navicella, valore_letto;
     navicella.x=-1;
@@ -178,28 +196,37 @@ void controllo(int pipein, int maxx, int maxy){
     for(i=0; i<numNemici; i++){
         nemico[i].x=-1;
     }
+    //stampa vite
     mvprintw(0, 1, "Vite: %d", vite);
     for(i=0; i<maxx; i++){
         mvprintw(1, i, "-");
     }
     do{
+        //leggo un valore dalla pipe
         read(pipein, &valore_letto, sizeof(valore_letto));
 
+        //controllo che tipo di valore ho letto
         switch (valore_letto.i) {
             case Nemico:
+                //elimino il nemico dalle coordinate vecchie
                 for (i = 0; i < 3; i++) {
                     mvprintw(nemico[valore_letto.id].y + i, nemico[valore_letto.id].x, "    ");
                 }
+                //aggiorno le coordinate del nemico
                 nemico[valore_letto.id] = valore_letto;
+                //stampo il nemico
                 for (i= 0; i < 3; i++) {
                     mvprintw(nemico[valore_letto.id].y + i, nemico[valore_letto.id].x, SpriteNemicoBase[i]);
                 }
                 break;
             case Navicella:
+                //elimino la navicella dalle coordinate vecchie
                 for (i = 0; i < 3; i++) {
                     mvprintw(navicella.y + i, navicella.x, "    ");
                 }
+                //aggiorno le coordinate della navicella
                 navicella = valore_letto;
+                //stampo la navicella
                 for(i=0; i<3; i++){
                     mvprintw(navicella.y+i, navicella.x, SpriteNavicella[i]);
                 }
@@ -212,8 +239,4 @@ void controllo(int pipein, int maxx, int maxy){
         refresh();
 
     } while(1);
-}
-
-void missile(){
-
 }
