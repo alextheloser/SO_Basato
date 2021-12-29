@@ -27,7 +27,7 @@ typedef struct{
 void navicella(int pipeout, int maxx, int maxy);
 void nemiciPrimoLivello(int pipeout, int x, int y, int idNemico, int maxx, int maxy);
 void controllo(int pipein, int maxx, int maxy);
-void missile(int pipeout, int maxx, int maxy, int navx, int navy, int pidMissile, int *isMissileVivo);
+void missile(int pipeout, int maxx, int maxy, int navx, int navy, int *isMissileVivo, int diry);
 
 int numNemici=10;
 
@@ -42,6 +42,8 @@ char SpriteNemicoBase[4][4]={
         " \\/"};
 
 char SpriteMissile='-';
+
+char SpriteBomba='§';
 
 int main() {
     int filedes[2], i, j=0, maxx, maxy, x_nemici, y_nemici, numColonne=1;
@@ -119,7 +121,7 @@ void navicella(int pipeout, int maxx, int maxy){
     pos_navicella.x=1;
     pos_navicella.y=2;
     pos_navicella.i=Navicella;
-    pid_t pid_missile;
+    pid_t pid_missile1, pid_missile2;
     int isMissileVivo=0;
 
     write(pipeout, &pos_navicella, sizeof(pos_navicella));
@@ -142,29 +144,33 @@ void navicella(int pipeout, int maxx, int maxy){
             case ' ':
                 if (isMissileVivo == 0) {
                     isMissileVivo=1;
-
                     //waitpid(pid_missile, &sig, WNOHANG);
-                    pid_missile = fork();
-                    switch (pid_missile) {
+                    pid_missile1 = fork();
+                    switch (pid_missile1) {
                         case -1:
                             perror("Errore nell'esecuzione della fork!");
                             exit(1);
                         case 0:
-                            missile(pipeout, maxx, maxy, pos_navicella.x, pos_navicella.y, pid_missile, &isMissileVivo);
-                            //isMissileVivo=0;
+                            missile(pipeout, maxx, maxy, pos_navicella.x, pos_navicella.y, &isMissileVivo, 1); //missile che va in alto all'inizio
                         default:
-                            break;
+                            pid_missile2=fork();
+                            switch(pid_missile2){
+                                case -1:
+                                    perror("Errore nell'esecuzione della fork!");
+                                    exit(1);
+                                case 0:
+                                    missile(pipeout, maxx, maxy, pos_navicella.x, pos_navicella.y, &isMissileVivo, -1);
+                                default:
+                                    break;
+                            }
                     }
-
-
                 }
-                int sig;
-                waitpid(pid_missile, &sig, WNOHANG);
-                //kill(pid_missile,1);
+                int sig1, sig2;
+                waitpid(pid_missile1, &sig1, WNOHANG);
+                waitpid(pid_missile2, &sig2, WNOHANG);
                 break;
         }
         write(pipeout,&pos_navicella,sizeof(pos_navicella));
-
     }
 }
 
@@ -212,7 +218,7 @@ void nemiciPrimoLivello(int pipeout, int x, int y, int idNemico, int maxx, int m
  * @param maxy Massimo valore delle Y sullo schermo
  */
 void controllo(int pipein, int maxx, int maxy){
-    Position nemico[numNemici], navicella, valore_letto, missile;
+    Position nemico[numNemici], bombe[numNemici], navicella, valore_letto, missili[2];
     navicella.x=-1;
     int i, vite=3;
     for(i=0; i<numNemici; i++){
@@ -255,13 +261,21 @@ void controllo(int pipein, int maxx, int maxy){
                 break;
 
             case Missile:
-                //elimino la navicella dalle coordinate vecchie
-                mvaddch(missile.y, missile.x,' ');
+                for(i=0; i<2; i++){
+                    mvaddch(missili[valore_letto.id].y, missili[valore_letto.id].x,' ');
+                    missili[valore_letto.id] = valore_letto;
+                    mvaddch(missili[valore_letto.id].y, missili[valore_letto.id].x,SpriteMissile);
+                }
+                break;
 
-                //aggiorno le coordinate della navicella
-                missile = valore_letto;
-                //stampo la navicella
-                mvaddch(missile.y, missile.x,SpriteMissile);
+            case Bomba:
+                for (i = 0; i < 3; i++) {
+                    mvaddch(bombe[valore_letto.id].y, bombe[valore_letto.id].x, ' ');
+                }
+                bombe[valore_letto.id] = valore_letto;
+                for (i= 0; i < 3; i++) {
+                    mvaddch(bombe[valore_letto.id].y, bombe[valore_letto.id].x, SpriteBomba);
+                }
                 break;
         }
         //stampa vite
@@ -274,13 +288,18 @@ void controllo(int pipein, int maxx, int maxy){
     } while(1);
 }
 
-void missile(int pipeout, int maxx, int maxy, int navx, int navy, int pidMissile, int *isMissileVivo){
+void missile(int pipeout, int maxx, int maxy, int navx, int navy, int *isMissileVivo, int diry){
 
     Position pos_missile;
     pos_missile.x=4+navx;
     pos_missile.y=1+navy;
     pos_missile.i=Missile;
-    int diry=1;
+    if(diry==1){
+        pos_missile.id=0;
+    }
+    else{
+        pos_missile.id=1;
+    }
 
     write(pipeout, &pos_missile, sizeof(pos_missile));
     while(!(pos_missile.x>maxx)){
