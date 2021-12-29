@@ -22,12 +22,11 @@ typedef struct{
     int id; //solo per i nemici
 }Position;
 
-
-
 void navicella(int pipeout, int maxx, int maxy);
 void nemiciPrimoLivello(int pipeout, int x, int y, int idNemico, int maxx, int maxy);
 void controllo(int pipein, int maxx, int maxy);
 void missile(int pipeout, int maxx, int maxy, int navx, int navy, int *isMissileVivo, int diry);
+void bomba(int pipeout, int maxx, int nemx, int nemy, int id);
 
 int numNemici=10;
 
@@ -40,6 +39,11 @@ char SpriteNemicoBase[4][4]={
         " /\\",
         "<OO",
         " \\/"};
+
+char SpriteNemicoAvanzato[4][4]={
+        "< <",
+        "   ",
+        "< <"};
 
 char SpriteMissile='-';
 
@@ -189,7 +193,8 @@ void nemiciPrimoLivello(int pipeout, int x, int y, int idNemico, int maxx, int m
     pos_nemico.y=y;
     pos_nemico.i=Nemico;
     pos_nemico.id=idNemico;
-    int r=1, dirx, diry;
+    pid_t pid_bomba;
+    int r=1, dirx, diry, cicli=0;
 
     write(pipeout, &pos_nemico, sizeof(pos_nemico));
     //rifare movimento delle navicelle nemiche!!!!!
@@ -205,6 +210,21 @@ void nemiciPrimoLivello(int pipeout, int x, int y, int idNemico, int maxx, int m
             diry=-diry;
         pos_nemico.y+=diry;
         r++;
+
+        if(!(cicli++%5)){
+            pid_bomba=fork();
+            switch(pid_bomba){
+                case -1:
+                    perror("Errore nell'esecuzione della fork!");
+                    exit(1);
+                case 0:
+                    bomba(pipeout, maxx, pos_nemico.x, pos_nemico.y, idNemico);
+                default:
+                    break;
+            }
+        }
+        int sig;
+        waitpid(pid_bomba, &sig, WNOHANG);
 
         write(pipeout,&pos_nemico,sizeof(pos_nemico));
         usleep(1000000);
@@ -223,12 +243,14 @@ void controllo(int pipein, int maxx, int maxy){
     int i, vite=3;
     for(i=0; i<numNemici; i++){
         nemico[i].x=-1;
+        bombe[i].x=-1;
     }
     //stampa vite
     mvprintw(0, 1, "Vite: %d", vite);
     for(i=0; i<maxx; i++){
         mvprintw(1, i, "-");
     }
+    refresh();
     do{
         //leggo un valore dalla pipe
         read(pipein, &valore_letto, sizeof(valore_letto));
@@ -238,7 +260,7 @@ void controllo(int pipein, int maxx, int maxy){
             case Nemico:
                 //elimino il nemico dalle coordinate vecchie
                 for (i = 0; i < 3; i++) {
-                    mvprintw(nemico[valore_letto.id].y + i, nemico[valore_letto.id].x, "    ");
+                    mvprintw(nemico[valore_letto.id].y + i, nemico[valore_letto.id].x, "     ");
                 }
                 //aggiorno le coordinate del nemico
                 nemico[valore_letto.id] = valore_letto;
@@ -269,13 +291,9 @@ void controllo(int pipein, int maxx, int maxy){
                 break;
 
             case Bomba:
-                for (i = 0; i < 3; i++) {
-                    mvaddch(bombe[valore_letto.id].y, bombe[valore_letto.id].x, ' ');
-                }
+                mvaddch(bombe[valore_letto.id].y, bombe[valore_letto.id].x, ' ');
                 bombe[valore_letto.id] = valore_letto;
-                for (i= 0; i < 3; i++) {
-                    mvaddch(bombe[valore_letto.id].y, bombe[valore_letto.id].x, SpriteBomba);
-                }
+                mvaddch(bombe[valore_letto.id].y, bombe[valore_letto.id].x, SpriteBomba);
                 break;
         }
         //stampa vite
@@ -303,13 +321,29 @@ void missile(int pipeout, int maxx, int maxy, int navx, int navy, int *isMissile
 
     write(pipeout, &pos_missile, sizeof(pos_missile));
     while(!(pos_missile.x>maxx)){
-        if(pos_missile.y+diry>maxy || pos_missile.y+diry<3) {diry=-diry;}
+        if(pos_missile.y+diry>maxy || pos_missile.y+diry<2) {diry=-diry;}
         pos_missile.y+=diry;
         pos_missile.x++;
         write(pipeout, &pos_missile, sizeof(pos_missile));
-        usleep(30000);
+        usleep(20000);
     }
     *isMissileVivo=0;
     //kill(getpid(),SIGKILL);
+    exit(1);
+}
+
+void bomba(int pipeout, int maxx, int nemx, int nemy, int id){
+    Position pos_bomba;
+    pos_bomba.x=nemx-1;
+    pos_bomba.y=1+nemy;
+    pos_bomba.i=Bomba;
+    pos_bomba.id=id;
+
+    write(pipeout, &pos_bomba, sizeof(pos_bomba));
+    while(!(pos_bomba.x<maxx)){
+        pos_bomba.x--;
+        write(pipeout, &pos_bomba, sizeof(pos_bomba));
+        usleep(50000);
+    }
     exit(1);
 }
