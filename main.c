@@ -140,10 +140,10 @@ void navicella(int pipeout, int maxx, int maxy){
                 }
                 break;
             case ' ':
-                mvprintw(maxy/2,maxx/2, "palle");
-
                 if (isMissileVivo == 0) {
                     isMissileVivo=1;
+
+                    //waitpid(pid_missile, &sig, WNOHANG);
                     pid_missile = fork();
                     switch (pid_missile) {
                         case -1:
@@ -151,14 +151,20 @@ void navicella(int pipeout, int maxx, int maxy){
                             exit(1);
                         case 0:
                             missile(pipeout, maxx, maxy, pos_navicella.x, pos_navicella.y, pid_missile, &isMissileVivo);
+                            //isMissileVivo=0;
                         default:
                             break;
                     }
+
+
                 }
+                int sig;
+                waitpid(pid_missile, &sig, WNOHANG);
                 //kill(pid_missile,1);
                 break;
         }
         write(pipeout,&pos_navicella,sizeof(pos_navicella));
+
     }
 }
 
@@ -277,16 +283,14 @@ void missile(int pipeout, int maxx, int maxy, int navx, int navy, int pidMissile
     int diry=1;
 
     write(pipeout, &pos_missile, sizeof(pos_missile));
-    while(1){
+    while(!(pos_missile.x>maxx)){
         if(pos_missile.y+diry>maxy || pos_missile.y+diry<3) {diry=-diry;}
         pos_missile.y+=diry;
         pos_missile.x++;
         write(pipeout, &pos_missile, sizeof(pos_missile));
-        usleep(10000);
-        if(pos_missile.x>maxx){
-           //mvprintw(maxy/2,maxx/2, "palle");
-            //exit(1);
-        }
+        usleep(30000);
     }
-
+    *isMissileVivo=0;
+    //kill(getpid(),SIGKILL);
+    exit(1);
 }
