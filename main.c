@@ -18,6 +18,7 @@ typedef struct{
     int y;
     identity i;
     int id; //solo per i nemici
+    pid_t pid;
 }Position;
 
 void navicella(int pipeout, int maxx, int maxy);
@@ -88,7 +89,7 @@ int main() {
         y_nemici=(y_nemici+6)%maxy;
         if(j>9 || y_nemici+3>maxy){
             j=0;
-            x_nemici-=4;
+            x_nemici-=6;
             if(numColonne%2==0)
                 y_nemici=3;
             else
@@ -125,7 +126,7 @@ int main() {
  */
 void navicella(int pipeout, int maxx, int maxy){
     Position pos_navicella;
-    pos_navicella.x=5;
+    pos_navicella.x=3;
     pos_navicella.y=maxy/2;
     pos_navicella.i=Navicella;
     pid_t pid_missile1, pid_missile2;
@@ -229,7 +230,7 @@ void nemiciPrimoLivello(int pipeout, int x, int y, int idNemico, int maxx, int m
             }
         }
         write(pipeout,&pos_nemico,sizeof(pos_nemico));
-        usleep(1000000);
+        usleep(1200000);
     }
 }
 
@@ -304,6 +305,11 @@ void controllo(int pipein, int maxx, int maxy){
                     || (navicella.x==bombe[i].x && navicella.y+1==bombe[i].y) || (navicella.x+1==bombe[i].x && navicella.y+1==bombe[i].y) || (navicella.x+2==bombe[i].x && navicella.y+1==bombe[i].y) || (navicella.x+3==bombe[i].x && navicella.y+1==bombe[i].y) || (navicella.x+4==bombe[i].x && navicella.y+1==bombe[i].y)
                     || (navicella.x==bombe[i].x && navicella.y+2==bombe[i].y) || (navicella.x+1==bombe[i].x && navicella.y+2==bombe[i].y) || (navicella.x+2==bombe[i].x && navicella.y+2==bombe[i].y)){
                         vite--;
+                        //aggiorno le coordinate della bomba che ha toccato la navicella in modo che "scompaia"
+                        bombe[i].x=-1;
+                        bombe[i].y=-1;
+                        //termino il processo che gestisce la bomba
+                        kill(bombe[i].pid, 1);
                     }
                 }
                 break;
@@ -352,6 +358,7 @@ void bomba(int pipeout, int maxx, int nemx, int nemy, int id){
     pos_bomba.y=1+nemy;
     pos_bomba.i=Bomba;
     pos_bomba.id=id;
+    pos_bomba.pid=getpid();
 
     write(pipeout, &pos_bomba, sizeof(pos_bomba));
 
