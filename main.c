@@ -25,7 +25,7 @@ void navicella(int pipeout, int maxx, int maxy);
 void nemiciPrimoLivello(int pipeout, int x, int y, int idNemico, int maxx, int maxy);
 void controllo(int pipein, int maxx, int maxy);
 void missile(int pipeout, int maxx, int maxy, int navx, int navy, int diry);
-void bomba(int pipeout, int maxx, int nemx, int nemy, int id);
+void bomba(int pipeout, int x_bomba, int y_bomba, int id);
 
 int numNemici=30;
 
@@ -48,6 +48,11 @@ char SpriteNemicoAvanzato[4][4]={
         "< <",
         "   ",
         "< <"};
+
+char SpriteNemicoAvanzatoMorente[4][4]={
+        "x x",
+        "   ",
+        "x x"};
 
 char SpriteMissile='>';
 
@@ -126,7 +131,7 @@ int main() {
  */
 void navicella(int pipeout, int maxx, int maxy){
     Position pos_navicella;
-    pos_navicella.x=3;
+    pos_navicella.x=2;
     pos_navicella.y=maxy/2;
     pos_navicella.i=Navicella;
     pid_t pid_missile1, pid_missile2;
@@ -199,8 +204,9 @@ void nemiciPrimoLivello(int pipeout, int x, int y, int idNemico, int maxx, int m
     pos_nemico.y=y;
     pos_nemico.i=Nemico;
     pos_nemico.id=idNemico;
+    pos_nemico.pid=getpid();
     pid_t pid_bomba;
-    int r=1, dirx, diry, cicli=1, sig;;
+    int r=1, dirx, diry, cicli=1;
 
     write(pipeout, &pos_nemico, sizeof(pos_nemico));
     while(1){
@@ -218,18 +224,66 @@ void nemiciPrimoLivello(int pipeout, int x, int y, int idNemico, int maxx, int m
 
         if(!(cicli++%5)){
             pid_bomba=fork();
-            mvprintw(maxy/2, maxx/2, "PISELLO");
             switch(pid_bomba){
                 case -1:
                     perror("Errore nell'esecuzione della fork!");
                     exit(1);
                 case 0:
-                    bomba(pipeout, maxx, pos_nemico.x, pos_nemico.y, idNemico);
+                    bomba(pipeout, pos_nemico.x-1, pos_nemico.y+1, idNemico);
                 default:
                     break;
             }
         }
         write(pipeout,&pos_nemico,sizeof(pos_nemico));
+        usleep(1200000);
+    }
+}
+
+void nemiciSecondoLivello(int pipeout, int x, int y, int idNemico, int maxx, int maxy){
+    Position pos_nemicoAvanzato;
+    pos_nemicoAvanzato.x=x;
+    pos_nemicoAvanzato.y=y;
+    pos_nemicoAvanzato.i=NemicoAvanzato;
+    pos_nemicoAvanzato.id=idNemico;
+    pos_nemicoAvanzato.pid=getpid();
+    pid_t pid_bomba[2];
+    int r=1, dirx, diry, cicli=1, i;
+
+    write(pipeout, &pos_nemicoAvanzato, sizeof(pos_nemicoAvanzato));
+    while(1){
+        dirx=-PASSO;
+        pos_nemicoAvanzato.x+=dirx;
+        if(r%2==0)
+            diry=PASSO;
+        else
+            diry=-PASSO;
+        if(pos_nemicoAvanzato.y+diry<2 || pos_nemicoAvanzato.y+diry>=maxy)
+            diry=-diry;
+        pos_nemicoAvanzato.y+=diry;
+        r++;
+
+        if(!(cicli++%5)){
+            pid_bomba[0]=fork();
+            switch(pid_bomba[0]){
+                case -1:
+                    perror("Errore nell'esecuzione della fork!");
+                    exit(1);
+                case 0:
+                    bomba(pipeout, pos_nemicoAvanzato.x-1, pos_nemicoAvanzato.y, idNemico);
+                default:
+                    pid_bomba[1]=fork();
+                    switch(pid_bomba[1]){
+                        case -1:
+                            perror("Errore nell'esecuzione della fork!");
+                            exit(1);
+                        case 0:
+                            bomba(pipeout, pos_nemicoAvanzato.x-1, pos_nemicoAvanzato.y+2, idNemico);
+                        default:
+                            break;
+                    }
+            }
+        }
+        write(pipeout,&pos_nemicoAvanzato,sizeof(pos_nemicoAvanzato));
         usleep(1200000);
     }
 }
@@ -241,9 +295,9 @@ void nemiciPrimoLivello(int pipeout, int x, int y, int idNemico, int maxx, int m
  * @param maxy Massimo valore delle Y sullo schermo
  */
 void controllo(int pipein, int maxx, int maxy){
-    Position nemico[numNemici], bombe[numNemici], navicella, valore_letto, missili[2];
+    Position nemico[numNemici], nemicoAvanzato[numNemici], bombe[numNemici], navicella, valore_letto, missili[2];
     navicella.x=-1;
-    int i, vite=3, n;
+    int i, vite=3, n, j;
     for(i=0; i<numNemici; i++){
         nemico[i].x=-1;
         bombe[i].x=-1;
@@ -268,15 +322,11 @@ void controllo(int pipein, int maxx, int maxy){
                 //aggiorno le coordinate del nemico
                 nemico[valore_letto.id] = valore_letto;
                 //stampo il nemico
-                for (i= 0; i < 3; i++) {
-                    for(n=0; n<3;n++){
-                        if((nemico[valore_letto.id].y+i==missili[0].y || nemico[valore_letto.id].y+i==missili[1].y) && (nemico[valore_letto.id].x+n==missili[0].x || nemico[valore_letto.id].x+n==missili[1].x)){
-                            mvprintw(nemico[valore_letto.id].y+i, nemico[valore_letto.id].x, SpriteNemicoMorente[i]);
-                            usleep(20000);
-                        }
-                        else mvprintw(nemico[valore_letto.id].y+i, nemico[valore_letto.id].x, SpriteNemicoBase[i]);
-                    }
+                for (i = 0; i < 3; i++) {
+                    mvprintw(nemico[valore_letto.id].y + i, nemico[valore_letto.id].x, SpriteNemicoBase[i]);
                 }
+                break;
+            case NemicoAvanzato:
                 break;
             case Navicella:
                 //elimino la navicella dalle coordinate vecchie
@@ -294,6 +344,26 @@ void controllo(int pipein, int maxx, int maxy){
                 mvaddch(missili[valore_letto.id].y, missili[valore_letto.id].x,' ');
                 missili[valore_letto.id] = valore_letto;
                 mvaddch(missili[valore_letto.id].y, missili[valore_letto.id].x,SpriteMissile);
+                for(i=0; i<numNemici; i++){
+                    for(n=0; n<2; n++){
+                        if((nemico[i].x==missili[n].x && nemico[i].y==missili[n].y) || (nemico[i].x+1==missili[n].x && nemico[i].y==missili[n].y) || (nemico[i].x+2==missili[n].x && nemico[i].y==missili[n].y)
+                           || (nemico[i].x==missili[n].x && nemico[i].y+1==missili[n].y) || (nemico[i].x+1==missili[n].x && nemico[i].y+1==missili[n].y) || (nemico[i].x+2==missili[n].x && nemico[i].y+1==missili[n].y)
+                           || (nemico[i].x==missili[n].x && nemico[i].y+2==missili[n].y) || (nemico[i].x+1==missili[n].x && nemico[i].y+2==missili[n].y) || (nemico[i].x+2==missili[n].x && nemico[i].y+2==missili[n].y)){
+                            for(j=0; j<3; j++){
+                                mvprintw(nemico[i].y+j, nemico[i].x, SpriteNemicoMorente[j]);
+                            }
+                            refresh();
+                            usleep(30000);
+                            for(j=0; j<3; j++){
+                                mvprintw(nemico[i].y+j, nemico[i].x, "    ");
+                            }
+                            nemico[i].x=-4;
+                            nemico[i].y=-4;
+                            kill(nemico[i].pid, 1);
+                            kill(missili[n].pid, 1);
+                        }
+                    }
+                }
                 break;
             case Bomba:
                 mvaddch(bombe[valore_letto.id].y, bombe[valore_letto.id].x,' ');
@@ -314,13 +384,14 @@ void controllo(int pipein, int maxx, int maxy){
                 }
                 break;
         }
-        //stampa vite
+        //stampa vite aggiornate
         mvprintw(0, 1, "Vite: %d", vite);
         for(i=0; i<maxx; i++){
             mvprintw(1, i, "-");
         }
         refresh();
     } while(vite>0);
+    //stampa messaggio di game over
 }
 
 void missile(int pipeout, int maxx, int maxy, int navx, int navy, int diry){
@@ -329,6 +400,7 @@ void missile(int pipeout, int maxx, int maxy, int navx, int navy, int diry){
     pos_missile.x=5+navx;
     pos_missile.y=1+navy;
     pos_missile.i=Missile;
+    pos_missile.pid=getpid();
     if(diry==1){
         pos_missile.id=0;
     }
@@ -352,10 +424,10 @@ void missile(int pipeout, int maxx, int maxy, int navx, int navy, int diry){
 
 }
 
-void bomba(int pipeout, int maxx, int nemx, int nemy, int id){
+void bomba(int pipeout, int x_bomba, int y_bomba, int id){
     Position pos_bomba;
-    pos_bomba.x=nemx-1;
-    pos_bomba.y=1+nemy;
+    pos_bomba.x=x_bomba;
+    pos_bomba.y=y_bomba;
     pos_bomba.i=Bomba;
     pos_bomba.id=id;
     pos_bomba.pid=getpid();
