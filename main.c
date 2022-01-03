@@ -360,6 +360,8 @@ void controllo(int pipein, int maxx, int maxy){
                             nemico[i].x=-4;
                             nemico[i].y=-4;
                             kill(nemico[i].pid, 1);
+                            missili[n].x=-1;
+                            missili[n].y=-1;
                             kill(missili[n].pid, 1);
                         }
                     }
