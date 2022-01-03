@@ -7,8 +7,6 @@
 #include <sys/wait.h>
 #include <time.h>
 
-/*#define MAXX 80
-#define MAXY 24*/ //prendo le dimensioni della finestra del terminale nel main
 #define PASSO 1
 
 typedef enum {Navicella, Nemico, NemicoAvanzato, Missile, Bomba}identity;
