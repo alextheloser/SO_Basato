@@ -9,7 +9,7 @@
 
 #define PASSO 1
 
-typedef enum {Navicella, Nemico, NemicoAvanzato, Missile, Bomba}identity;
+typedef enum {Navicella, Nemico, Missile, Bomba}identity;
 
 typedef struct{
     int x;
@@ -19,18 +19,37 @@ typedef struct{
     pid_t pid;
 }Position;
 
+
+int menu();
 void navicella(int pipeout, int maxx, int maxy);
 void nemiciPrimoLivello(int pipeout, int x, int y, int idNemico, int maxx, int maxy);
+void nemiciSecondoLivello(int pipeout, int x, int y, int idNemico, int maxx, int maxy);
 void controllo(int pipein, int maxx, int maxy);
 void missile(int pipeout, int maxx, int maxy, int navx, int navy, int diry);
 void bomba(int pipeout, int x_bomba, int y_bomba, int id);
 
-int numNemici=30;
+int numNemici=2;
+int nemiciVivi;
 
 char SpriteNavicella[6][6]={
         "<-\\",
         "~[-->",
         "<-/"};
+
+char SpriteNavicellaDmgd2[6][6]={
+        "<X\\",
+        "-[-->",
+        "<X/"};
+
+char SpriteNavicellaDmgd3[6][6]={
+        "<X\\",
+        ":[XX>",
+        "<X/"};
+
+char SpriteNavicellaMorta[6][6]={
+        "XX\\",
+        "XXXXx",
+        "XX/"};
 
 char SpriteNemicoBase[4][4]={
         " /\\",
@@ -56,6 +75,12 @@ char SpriteMissile='>';
 
 char SpriteBomba='@';
 
+char logo[4][4]={
+        "123",
+        "456",
+        "789"
+};
+
 int main() {
     int filedes[2], i, j=0, maxx, maxy, x_nemici, y_nemici, numColonne=1;
     pid_t pid_navicella, pid_nemici[numNemici];
@@ -70,6 +95,9 @@ int main() {
     getmaxyx(stdscr, maxy, maxx);
     x_nemici=maxx-5;
     y_nemici=3;
+
+    refresh();
+    nemiciVivi=numNemici;
 
     if(pipe(filedes) == -1){
         perror("Errore nella creazione della pipe!");
@@ -88,6 +116,8 @@ int main() {
             default:
                 break;
         }
+
+
         j++;
         y_nemici=(y_nemici+6)%maxy;
         if(j>9 || y_nemici+3>maxy){
@@ -100,6 +130,9 @@ int main() {
             numColonne++;
         }
     }
+
+
+
     pid_navicella=fork();
     switch(pid_navicella){
         case -1:
@@ -120,6 +153,8 @@ int main() {
     endwin();
     return 0;
 }
+
+
 
 /**
  * Funzione che si occupa di generare le coordinate della navicella
@@ -236,7 +271,7 @@ void nemiciPrimoLivello(int pipeout, int x, int y, int idNemico, int maxx, int m
         usleep(1200000);
     }
 }
-
+/*
 void nemiciSecondoLivello(int pipeout, int x, int y, int idNemico, int maxx, int maxy){
     Position pos_nemicoAvanzato;
     pos_nemicoAvanzato.x=x;
@@ -285,7 +320,7 @@ void nemiciSecondoLivello(int pipeout, int x, int y, int idNemico, int maxx, int
         usleep(1200000);
     }
 }
-
+*/
 /**
  * Funzione che si occupa della stampa dei vari elementi a schermo e delle collisioni
  * @param pipein File descriptor in lettura della pipe
@@ -293,10 +328,12 @@ void nemiciSecondoLivello(int pipeout, int x, int y, int idNemico, int maxx, int
  * @param maxy Massimo valore delle Y sullo schermo
  */
 void controllo(int pipein, int maxx, int maxy){
+
     Position nemico[numNemici], nemicoAvanzato[numNemici], bombe[numNemici], navicella, valore_letto, missili[2];
     navicella.x=-1;
     int i, vite=3, n, j;
     for(i=0; i<numNemici; i++){
+        statoNemico[i]=0;
         nemico[i].x=-1;
         bombe[i].x=-1;
     }
@@ -305,7 +342,7 @@ void controllo(int pipein, int maxx, int maxy){
     for(i=0; i<maxx; i++){
         mvprintw(1, i, "-");
     }
-    refresh();
+    //refresh();
     do{
         //leggo un valore dalla pipe
         read(pipein, &valore_letto, sizeof(valore_letto));
@@ -313,31 +350,115 @@ void controllo(int pipein, int maxx, int maxy){
         //controllo che tipo di valore ho letto
         switch (valore_letto.i) {
             case Nemico:
-                //elimino il nemico dalle coordinate vecchie
-                for (i = 0; i < 3; i++) {
-                    mvprintw(nemico[valore_letto.id].y + i, nemico[valore_letto.id].x, "    ");
+
+
+                switch(statoNemico[valore_letto.id]){
+                    case 0: //nemico base
+                        //elimino il nemico dalle coordinate vecchie
+                        for (i = 0; i < 3; i++) {
+                            mvprintw(nemico[valore_letto.id].y + i, nemico[valore_letto.id].x, "    ");
+                        }
+                        //aggiorno le coordinate del nemico
+                        nemico[valore_letto.id] = valore_letto;
+                        //stampo il nemico
+                        for (i = 0; i < 3; i++) {
+                            mvprintw(nemico[valore_letto.id].y + i, nemico[valore_letto.id].x, SpriteNemicoBase[i]);
+                        }
+                        break;
+                    //nemico Avanzato
+                    case 1:
+                        for (i = 0; i < 3; i++) {
+                                mvprintw(nemico[valore_letto.id].y + i, nemico[valore_letto.id].x, "   ");
+                            }
+
+
+                        for (i = 0; i < 3; i++) {
+                            mvprintw(nemico[valore_letto.id].y + i, nemico[valore_letto.id].x+4, "   ");
+                        }
+                        for (i = 0; i < 3; i++) {
+                            mvprintw(nemico[valore_letto.id].y + i+4, nemico[valore_letto.id].x, "   ");
+                        }
+
+                        for (i = 0; i < 3; i++) {
+                            mvprintw(nemico[valore_letto.id].y + i+4, nemico[valore_letto.id].x+4, "   ");
+                        }
+
+                        mvprintw(nemico[valore_letto.id].y+3, nemico[valore_letto.id].x+3, " ");
+                        nemico[valore_letto.id] = valore_letto;
+                        mvprintw(nemico[valore_letto.id].y+3, nemico[valore_letto.id].x+3, "X");
+
+                        for (i = 0; i < 3; i++) {
+                                mvprintw(nemico[valore_letto.id].y + i, nemico[valore_letto.id].x, SpriteNemicoAvanzato[i]);
+                            }
+
+
+                        for (i = 0; i < 3; i++) {
+                            mvprintw(nemico[valore_letto.id].y + i, nemico[valore_letto.id].x+4, SpriteNemicoAvanzato[i]);
+                        }
+                        for (i = 0; i < 3; i++) {
+                            mvprintw(nemico[valore_letto.id].y + i+4, nemico[valore_letto.id].x, SpriteNemicoAvanzato[i]);
+                        }
+
+                        for (i = 0; i < 3; i++) {
+                            mvprintw(nemico[valore_letto.id].y + i+4, nemico[valore_letto.id].x+4, SpriteNemicoAvanzato[i]);
+                        }
+                        break;
                 }
-                //aggiorno le coordinate del nemico
-                nemico[valore_letto.id] = valore_letto;
-                //stampo il nemico
-                for (i = 0; i < 3; i++) {
-                    mvprintw(nemico[valore_letto.id].y + i, nemico[valore_letto.id].x, SpriteNemicoBase[i]);
-                }
-                break;
-            case NemicoAvanzato:
                 break;
             case Navicella:
-                //elimino la navicella dalle coordinate vecchie
-                for (i = 0; i < 3; i++) {
-                    mvprintw(navicella.y + i, navicella.x, "     ");
-                }
-                //aggiorno le coordinate della navicella
-                navicella = valore_letto;
-                //stampo la navicella
-                for(i=0; i<3; i++){
-                    mvprintw(navicella.y+i, navicella.x, SpriteNavicella[i]);
+
+                switch(vite){
+                    case 3:
+                        //elimino la navicella dalle coordinate vecchie
+                        for (i = 0; i < 3; i++) {
+                            mvprintw(navicella.y + i, navicella.x, "     ");
+                        }
+                        //aggiorno le coordinate della navicella
+                        navicella = valore_letto;
+                        //stampo la navicella
+                        for(i=0; i<3; i++){
+                            mvprintw(navicella.y+i, navicella.x, SpriteNavicella[i]);
+                        }
+                        break;
+                    case 2:
+                        //elimino la navicella dalle coordinate vecchie
+                        for (i = 0; i < 3; i++) {
+                            mvprintw(navicella.y + i, navicella.x, "     ");
+                        }
+                        //aggiorno le coordinate della navicella
+                        navicella = valore_letto;
+                        //stampo la navicella
+                        for(i=0; i<3; i++){
+                            mvprintw(navicella.y+i, navicella.x, SpriteNavicellaDmgd2[i]);
+                        }
+                        break;
+                    case 1:
+                        //elimino la navicella dalle coordinate vecchie
+                        for (i = 0; i < 3; i++) {
+                            mvprintw(navicella.y + i, navicella.x, "     ");
+                        }
+                        //aggiorno le coordinate della navicella
+                        navicella = valore_letto;
+                        //stampo la navicella
+                        for(i=0; i<3; i++){
+                            mvprintw(navicella.y+i, navicella.x, SpriteNavicellaDmgd3[i]);
+                        }
+                        break;
+                    case 0:
+                        //elimino la navicella dalle coordinate vecchie
+                        for (i = 0; i < 3; i++) {
+                            mvprintw(navicella.y + i, navicella.x, "     ");
+                        }
+                        //aggiorno le coordinate della navicella
+                        navicella = valore_letto;
+                        //stampo la navicella
+                        for(i=0; i<3; i++){
+                            mvprintw(navicella.y+i, navicella.x, SpriteNavicellaMorta[i]);
+                        }
+                        break;
                 }
                 break;
+
             case Missile:
                 mvaddch(missili[valore_letto.id].y, missili[valore_letto.id].x,' ');
                 missili[valore_letto.id] = valore_letto;
@@ -347,6 +468,11 @@ void controllo(int pipein, int maxx, int maxy){
                         if((nemico[i].x==missili[n].x && nemico[i].y==missili[n].y) || (nemico[i].x+1==missili[n].x && nemico[i].y==missili[n].y) || (nemico[i].x+2==missili[n].x && nemico[i].y==missili[n].y)
                            || (nemico[i].x==missili[n].x && nemico[i].y+1==missili[n].y) || (nemico[i].x+1==missili[n].x && nemico[i].y+1==missili[n].y) || (nemico[i].x+2==missili[n].x && nemico[i].y+1==missili[n].y)
                            || (nemico[i].x==missili[n].x && nemico[i].y+2==missili[n].y) || (nemico[i].x+1==missili[n].x && nemico[i].y+2==missili[n].y) || (nemico[i].x+2==missili[n].x && nemico[i].y+2==missili[n].y)){
+                            //mvaddch(missili[n].y, missili[n].x,'X');
+                            mvaddch(missili[n].y, missili[n].x,' ');
+                            missili[n].x=-1;
+                            missili[n].y=-1;
+                            kill(missili[n].pid, 1);
                             for(j=0; j<3; j++){
                                 mvprintw(nemico[i].y+j, nemico[i].x, SpriteNemicoMorente[j]);
                             }
@@ -355,12 +481,12 @@ void controllo(int pipein, int maxx, int maxy){
                             for(j=0; j<3; j++){
                                 mvprintw(nemico[i].y+j, nemico[i].x, "    ");
                             }
-                            nemico[i].x=-4;
-                            nemico[i].y=-4;
-                            kill(nemico[i].pid, 1);
-                            missili[n].x=-1;
-                            missili[n].y=-1;
-                            kill(missili[n].pid, 1);
+                            //nemico[i].x=-4;
+                            //nemico[i].y=-4;
+                            //kill(nemico[i].pid, 1);
+
+                            statoNemico[i]=1;
+                            //nemiciVivi--;
                         }
                     }
                 }
@@ -372,14 +498,41 @@ void controllo(int pipein, int maxx, int maxy){
                 //se la bomba tocca la navicella viene persa una vita
                 for(i=0; i<numNemici; i++){
                     if((navicella.x==bombe[i].x && navicella.y==bombe[i].y) || (navicella.x+1==bombe[i].x && navicella.y==bombe[i].y) || (navicella.x+2==bombe[i].x && navicella.y==bombe[i].y)
-                    || (navicella.x==bombe[i].x && navicella.y+1==bombe[i].y) || (navicella.x+1==bombe[i].x && navicella.y+1==bombe[i].y) || (navicella.x+2==bombe[i].x && navicella.y+1==bombe[i].y) || (navicella.x+3==bombe[i].x && navicella.y+1==bombe[i].y) || (navicella.x+4==bombe[i].x && navicella.y+1==bombe[i].y)
-                    || (navicella.x==bombe[i].x && navicella.y+2==bombe[i].y) || (navicella.x+1==bombe[i].x && navicella.y+2==bombe[i].y) || (navicella.x+2==bombe[i].x && navicella.y+2==bombe[i].y)){
+                       || (navicella.x==bombe[i].x && navicella.y+1==bombe[i].y) || (navicella.x+1==bombe[i].x && navicella.y+1==bombe[i].y) || (navicella.x+2==bombe[i].x && navicella.y+1==bombe[i].y) || (navicella.x+3==bombe[i].x && navicella.y+1==bombe[i].y) || (navicella.x+4==bombe[i].x && navicella.y+1==bombe[i].y)
+                       || (navicella.x==bombe[i].x && navicella.y+2==bombe[i].y) || (navicella.x+1==bombe[i].x && navicella.y+2==bombe[i].y) || (navicella.x+2==bombe[i].x && navicella.y+2==bombe[i].y)){
                         vite--;
                         //aggiorno le coordinate della bomba che ha toccato la navicella in modo che "scompaia"
                         bombe[i].x=-1;
                         bombe[i].y=-1;
                         //termino il processo che gestisce la bomba
                         kill(bombe[i].pid, 1);
+
+                        int v=i;
+                        i=0;
+                        switch(vite) {
+                            case 2:
+                                //elimino la navicella dalle coordinate vecchie
+                                for (i = 0; i < 3; i++) {
+                                    mvprintw(navicella.y + i, navicella.x, "     ");
+                                }
+                                //stampo la navicella
+                                for (i = 0; i < 3; i++) {
+                                    mvprintw(navicella.y + i, navicella.x, SpriteNavicellaDmgd2[i]);
+                                }
+                                break;
+                            case 1:
+                                //elimino la navicella dalle coordinate vecchie
+                                for (i = 0; i < 3; i++) {
+                                    mvprintw(navicella.y + i, navicella.x, "     ");
+                                }
+                                //stampo la navicella
+                                for (i = 0; i < 3; i++) {
+                                    mvprintw(navicella.y + i, navicella.x, SpriteNavicellaDmgd3[i]);
+                                }
+                                break;
+                        }
+                        i=v;
+
                     }
                 }
                 break;
@@ -390,7 +543,7 @@ void controllo(int pipein, int maxx, int maxy){
             mvprintw(1, i, "-");
         }
         refresh();
-    } while(vite>0);
+    } while(vite>0 /*&& nemiciVivi>0*/);
     //stampa messaggio di game over
 }
 
