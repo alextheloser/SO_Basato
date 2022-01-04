@@ -61,10 +61,26 @@ char SpriteNemicoMorente[4][4]={
         "xxx",
         " xx"};
 
-char SpriteNemicoAvanzato[4][4]={
-        "< <",
+/*char SpriteNemicoAvanzato[4][4]={
+        "0 1",
         "   ",
-        "< <"};
+        "2 3"};*/
+
+char SpriteNemicoAvanzato[4][4]={
+        "<:(",
+        "<:(",
+        "<:( "};
+
+
+
+/*123 123
+456 456
+789 789
+   X
+123 123
+456 456
+789 789*/
+
 
 char SpriteNemicoAvanzatoMorente[4][4]={
         "x x",
@@ -93,7 +109,7 @@ int main() {
     srand((int)time(NULL));
 
     getmaxyx(stdscr, maxy, maxx);
-    x_nemici=maxx-5;
+    x_nemici=maxx-7;
     y_nemici=3;
 
     refresh();
@@ -119,10 +135,10 @@ int main() {
 
 
         j++;
-        y_nemici=(y_nemici+6)%maxy;
+        y_nemici=(y_nemici+9)%maxy;
         if(j>9 || y_nemici+3>maxy){
             j=0;
-            x_nemici-=6;
+            x_nemici-=9;
             if(numColonne%2==0)
                 y_nemici=3;
             else
@@ -331,7 +347,7 @@ void controllo(int pipein, int maxx, int maxy){
 
     Position nemico[numNemici], nemicoAvanzato[numNemici], bombe[numNemici], navicella, valore_letto, missili[2];
     navicella.x=-1;
-    int i, vite=3, n, j;
+    int i, vite=3, n, j, statoNemico[numNemici], vitaNemici[numNemici][4];
     for(i=0; i<numNemici; i++){
         statoNemico[i]=0;
         nemico[i].x=-1;
