@@ -28,7 +28,7 @@ void controllo(int pipein, int maxx, int maxy);
 void missile(int pipeout, int maxx, int maxy, int navx, int navy, int diry);
 void bomba(int pipeout, int x_bomba, int y_bomba, int id);
 
-int numNemici=2;
+int numNemici=30;
 int nemiciVivi;
 
 char SpriteNavicella[6][6]={
@@ -254,7 +254,7 @@ void nemiciPrimoLivello(int pipeout, int x, int y, int idNemico, int maxx, int m
             diry=-diry;
         pos_nemico.y+=diry;
         r++;
-
+/*
         if(!(cicli++%5)){
             pid_bomba=fork();
             switch(pid_bomba){
@@ -266,7 +266,7 @@ void nemiciPrimoLivello(int pipeout, int x, int y, int idNemico, int maxx, int m
                 default:
                     break;
             }
-        }
+        }*/
         write(pipeout,&pos_nemico,sizeof(pos_nemico));
         usleep(1200000);
     }
@@ -336,7 +336,11 @@ void controllo(int pipein, int maxx, int maxy){
         statoNemico[i]=0;
         nemico[i].x=-1;
         bombe[i].x=-1;
+        for(j=0;j<4;j++){
+            vitaNemici[i][j]=1;
+        }
     }
+
     //stampa vite
     mvprintw(0, 1, "Vite: %d", vite);
     for(i=0; i<maxx; i++){
@@ -350,8 +354,6 @@ void controllo(int pipein, int maxx, int maxy){
         //controllo che tipo di valore ho letto
         switch (valore_letto.i) {
             case Nemico:
-
-
                 switch(statoNemico[valore_letto.id]){
                     case 0: //nemico base
                         //elimino il nemico dalle coordinate vecchie
@@ -367,40 +369,59 @@ void controllo(int pipein, int maxx, int maxy){
                         break;
                     //nemico Avanzato
                     case 1:
-                        for (i = 0; i < 3; i++) {
+                        if(vitaNemici[valore_letto.id][0]==1) {
+                            for (i = 0; i < 3; i++) {
                                 mvprintw(nemico[valore_letto.id].y + i, nemico[valore_letto.id].x, "   ");
                             }
-
-
-                        for (i = 0; i < 3; i++) {
-                            mvprintw(nemico[valore_letto.id].y + i, nemico[valore_letto.id].x+4, "   ");
-                        }
-                        for (i = 0; i < 3; i++) {
-                            mvprintw(nemico[valore_letto.id].y + i+4, nemico[valore_letto.id].x, "   ");
                         }
 
-                        for (i = 0; i < 3; i++) {
-                            mvprintw(nemico[valore_letto.id].y + i+4, nemico[valore_letto.id].x+4, "   ");
+                        if(vitaNemici[valore_letto.id][1]==1) {
+                            for (i = 0; i < 3; i++) {
+                                mvprintw(nemico[valore_letto.id].y + i, nemico[valore_letto.id].x + 4, "   ");
+                            }
+                        }
+
+                        if(vitaNemici[valore_letto.id][2]==1) {
+                            for (i = 0; i < 3; i++) {
+                                mvprintw(nemico[valore_letto.id].y + i + 4, nemico[valore_letto.id].x, "   ");
+                            }
+                        }
+
+                        if(vitaNemici[valore_letto.id][3]==1) {
+                            for (i = 0; i < 3; i++) {
+                                mvprintw(nemico[valore_letto.id].y + i + 4, nemico[valore_letto.id].x + 4, "   ");
+                            }
                         }
 
                         mvprintw(nemico[valore_letto.id].y+3, nemico[valore_letto.id].x+3, " ");
                         nemico[valore_letto.id] = valore_letto;
                         mvprintw(nemico[valore_letto.id].y+3, nemico[valore_letto.id].x+3, "X");
 
-                        for (i = 0; i < 3; i++) {
-                                mvprintw(nemico[valore_letto.id].y + i, nemico[valore_letto.id].x, SpriteNemicoAvanzato[i]);
+                        if(vitaNemici[valore_letto.id][0]==1) {
+                            for (i = 0; i < 3; i++) {
+                                mvprintw(nemico[valore_letto.id].y + i, nemico[valore_letto.id].x,
+                                         SpriteNemicoAvanzato[i]);
                             }
-
-
-                        for (i = 0; i < 3; i++) {
-                            mvprintw(nemico[valore_letto.id].y + i, nemico[valore_letto.id].x+4, SpriteNemicoAvanzato[i]);
-                        }
-                        for (i = 0; i < 3; i++) {
-                            mvprintw(nemico[valore_letto.id].y + i+4, nemico[valore_letto.id].x, SpriteNemicoAvanzato[i]);
                         }
 
-                        for (i = 0; i < 3; i++) {
-                            mvprintw(nemico[valore_letto.id].y + i+4, nemico[valore_letto.id].x+4, SpriteNemicoAvanzato[i]);
+                        if(vitaNemici[valore_letto.id][1]==1) {
+                            for (i = 0; i < 3; i++) {
+                                mvprintw(nemico[valore_letto.id].y + i, nemico[valore_letto.id].x + 4,
+                                         SpriteNemicoAvanzato[i]);
+                            }
+                        }
+                        if(vitaNemici[valore_letto.id][2]==1) {
+                            for (i = 0; i < 3; i++) {
+                                mvprintw(nemico[valore_letto.id].y + i + 4, nemico[valore_letto.id].x,
+                                         SpriteNemicoAvanzato[i]);
+                            }
+                        }
+
+                        if(vitaNemici[valore_letto.id][3]==1) {
+                            for (i = 0; i < 3; i++) {
+                                mvprintw(nemico[valore_letto.id].y + i + 4, nemico[valore_letto.id].x + 4,
+                                         SpriteNemicoAvanzato[i]);
+                            }
                         }
                         break;
                 }
@@ -465,28 +486,127 @@ void controllo(int pipein, int maxx, int maxy){
                 mvaddch(missili[valore_letto.id].y, missili[valore_letto.id].x,SpriteMissile);
                 for(i=0; i<numNemici; i++){
                     for(n=0; n<2; n++){
-                        if((nemico[i].x==missili[n].x && nemico[i].y==missili[n].y) || (nemico[i].x+1==missili[n].x && nemico[i].y==missili[n].y) || (nemico[i].x+2==missili[n].x && nemico[i].y==missili[n].y)
-                           || (nemico[i].x==missili[n].x && nemico[i].y+1==missili[n].y) || (nemico[i].x+1==missili[n].x && nemico[i].y+1==missili[n].y) || (nemico[i].x+2==missili[n].x && nemico[i].y+1==missili[n].y)
-                           || (nemico[i].x==missili[n].x && nemico[i].y+2==missili[n].y) || (nemico[i].x+1==missili[n].x && nemico[i].y+2==missili[n].y) || (nemico[i].x+2==missili[n].x && nemico[i].y+2==missili[n].y)){
-                            //mvaddch(missili[n].y, missili[n].x,'X');
-                            mvaddch(missili[n].y, missili[n].x,' ');
-                            missili[n].x=-1;
-                            missili[n].y=-1;
-                            kill(missili[n].pid, 1);
-                            for(j=0; j<3; j++){
-                                mvprintw(nemico[i].y+j, nemico[i].x, SpriteNemicoMorente[j]);
-                            }
-                            refresh();
-                            usleep(30000);
-                            for(j=0; j<3; j++){
-                                mvprintw(nemico[i].y+j, nemico[i].x, "    ");
-                            }
-                            //nemico[i].x=-4;
-                            //nemico[i].y=-4;
-                            //kill(nemico[i].pid, 1);
+                        if(statoNemico[i]==0) {
+                            if ((nemico[i].x == missili[n].x && nemico[i].y == missili[n].y) ||
+                                (nemico[i].x + 1 == missili[n].x && nemico[i].y == missili[n].y) ||
+                                (nemico[i].x + 2 == missili[n].x && nemico[i].y == missili[n].y)
+                                || (nemico[i].x == missili[n].x && nemico[i].y + 1 == missili[n].y) ||
+                                (nemico[i].x + 1 == missili[n].x && nemico[i].y + 1 == missili[n].y) ||
+                                (nemico[i].x + 2 == missili[n].x && nemico[i].y + 1 == missili[n].y)
+                                || (nemico[i].x == missili[n].x && nemico[i].y + 2 == missili[n].y) ||
+                                (nemico[i].x + 1 == missili[n].x && nemico[i].y + 2 == missili[n].y) ||
+                                (nemico[i].x + 2 == missili[n].x && nemico[i].y + 2 == missili[n].y)) {
+                                //mvaddch(missili[n].y, missili[n].x,'X');
+                                mvaddch(missili[n].y, missili[n].x, ' ');
+                                missili[n].x = -1;
+                                missili[n].y = -1;
+                                kill(missili[n].pid, 1);
+                                for (j = 0; j < 3; j++) {
+                                    mvprintw(nemico[i].y + j, nemico[i].x, SpriteNemicoMorente[j]);
+                                }
 
-                            statoNemico[i]=1;
-                            //nemiciVivi--;
+                                refresh();
+                                usleep(30000);
+                                for (j = 0; j < 3; j++) {
+                                    mvprintw(nemico[i].y + j, nemico[i].x, "    ");
+                                }
+                                //nemico[i].x=-4;
+                                //nemico[i].y=-4;
+                                //kill(nemico[i].pid, 1);
+
+                                statoNemico[i] = 1;
+                                //nemiciVivi--;
+                            }
+                        }
+                        else{
+                            //primo check enorme
+                            if(vitaNemici[i][0]==1 && ((nemico[i].x == missili[n].x && nemico[i].y == missili[n].y) ||
+                               (nemico[i].x + 1 == missili[n].x && nemico[i].y == missili[n].y) ||
+                               (nemico[i].x + 2 == missili[n].x && nemico[i].y == missili[n].y)
+                               || (nemico[i].x == missili[n].x && nemico[i].y + 1 == missili[n].y) ||
+                               (nemico[i].x + 1 == missili[n].x && nemico[i].y + 1 == missili[n].y) ||
+                               (nemico[i].x + 2 == missili[n].x && nemico[i].y + 1 == missili[n].y)
+                               || (nemico[i].x == missili[n].x && nemico[i].y + 2 == missili[n].y) ||
+                               (nemico[i].x + 1 == missili[n].x && nemico[i].y + 2 == missili[n].y) ||
+                               (nemico[i].x + 2 == missili[n].x && nemico[i].y + 2 == missili[n].y))){
+                                for (j = 0; j < 3; j++) {
+                                    mvaddch(missili[n].y, missili[n].x, ' ');
+                                    missili[n].x = -1;
+                                    missili[n].y = -1;
+                                    kill(missili[n].pid, 1);
+                                    mvprintw(nemico[i].y + j, nemico[i].x, "   ");
+                                }
+                                vitaNemici[i][0]=0;
+                            }
+                            //secondo check enorme
+                            if(vitaNemici[i][1]==1 && ((nemico[i].x + 4 == missili[n].x && nemico[i].y == missili[n].y) ||
+                               (nemico[i].x + 5 == missili[n].x && nemico[i].y == missili[n].y) ||
+                               (nemico[i].x + 6 == missili[n].x && nemico[i].y == missili[n].y)
+                               || (nemico[i].x + 4== missili[n].x && nemico[i].y + 1 == missili[n].y) ||
+                               (nemico[i].x + 5 == missili[n].x && nemico[i].y + 1 == missili[n].y) ||
+                               (nemico[i].x + 6 == missili[n].x && nemico[i].y + 1 == missili[n].y)
+                               || (nemico[i].x + 4== missili[n].x && nemico[i].y + 2 == missili[n].y) ||
+                               (nemico[i].x + 5 == missili[n].x && nemico[i].y + 2 == missili[n].y) ||
+                               (nemico[i].x + 6 == missili[n].x && nemico[i].y + 2 == missili[n].y))){
+                                for (j = 0; j < 3; j++) {
+                                    mvaddch(missili[n].y, missili[n].x, ' ');
+                                    missili[n].x = -1;
+                                    missili[n].y = -1;
+                                    kill(missili[n].pid, 1);
+                                    mvprintw(nemico[i].y + j, nemico[i].x + 4, "   ");
+                                }
+                                vitaNemici[i][1]=0;
+                            }
+
+                            if(vitaNemici[i][2]==1 && ((nemico[i].x == missili[n].x && nemico[i].y + 4 == missili[n].y) ||
+                               (nemico[i].x + 1 == missili[n].x && nemico[i].y + 4 == missili[n].y) ||
+                               (nemico[i].x + 2 == missili[n].x && nemico[i].y + 4== missili[n].y)
+                               || (nemico[i].x == missili[n].x && nemico[i].y + 5 == missili[n].y) ||
+                               (nemico[i].x + 1 == missili[n].x && nemico[i].y + 5 == missili[n].y) ||
+                               (nemico[i].x + 2 == missili[n].x && nemico[i].y + 5 == missili[n].y)
+                               || (nemico[i].x == missili[n].x && nemico[i].y + 6 == missili[n].y) ||
+                               (nemico[i].x + 1 == missili[n].x && nemico[i].y + 6 == missili[n].y) ||
+                               (nemico[i].x + 2 == missili[n].x && nemico[i].y + 6 == missili[n].y))){
+                                for (j = 0; j < 3; j++) {
+                                    mvaddch(missili[n].y, missili[n].x, ' ');
+                                    missili[n].x = -1;
+                                    missili[n].y = -1;
+                                    kill(missili[n].pid, 1);
+                                    mvprintw(nemico[i].y + j + 4, nemico[i].x, "   ");
+                                }
+                                vitaNemici[i][2]=0;
+                            }
+
+                            if(vitaNemici[i][3]==1 && ((nemico[i].x + 4== missili[n].x && nemico[i].y + 4 == missili[n].y) ||
+                               (nemico[i].x + 5 == missili[n].x && nemico[i].y + 4 == missili[n].y) ||
+                               (nemico[i].x + 6 == missili[n].x && nemico[i].y + 4== missili[n].y)
+                               || (nemico[i].x + 4== missili[n].x && nemico[i].y + 5 == missili[n].y) ||
+                               (nemico[i].x + 5 == missili[n].x && nemico[i].y + 5 == missili[n].y) ||
+                               (nemico[i].x + 6 == missili[n].x && nemico[i].y + 5 == missili[n].y)
+                               || (nemico[i].x + 4== missili[n].x && nemico[i].y + 6 == missili[n].y) ||
+                               (nemico[i].x + 5 == missili[n].x && nemico[i].y + 6 == missili[n].y) ||
+                               (nemico[i].x + 6 == missili[n].x && nemico[i].y + 6 == missili[n].y))){
+                                for (j = 0; j < 3; j++) {
+                                    mvaddch(missili[n].y, missili[n].x, ' ');
+                                    missili[n].x = -1;
+                                    missili[n].y = -1;
+                                    kill(missili[n].pid, 1);
+                                    mvprintw(nemico[i].y + j + 4, nemico[i].x + 4, "   ");
+                                }
+                                vitaNemici[i][3]=0;
+                            }
+
+                            if(vitaNemici[i][0]==0 && vitaNemici[i][1]==0 && vitaNemici[i][2]==0 && vitaNemici[i][3]==0){
+                                //mvaddch(missili[n].y, missili[n].x,'X');
+
+                                refresh();
+                                usleep(30000);
+                                nemico[i].x=-50;
+                                nemico[i].y=-50;
+                                kill(nemico[i].pid, 1);
+                                nemiciVivi--;
+                            }
+
                         }
                     }
                 }
@@ -543,7 +663,7 @@ void controllo(int pipein, int maxx, int maxy){
             mvprintw(1, i, "-");
         }
         refresh();
-    } while(vite>0 /*&& nemiciVivi>0*/);
+    } while(vite>0 && nemiciVivi>0);
     //stampa messaggio di game over
 }
 
