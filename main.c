@@ -343,7 +343,7 @@ void controllo(int pipein, int maxx, int maxy){
 
     Position nemico[numNemici], bombe[numNemici], bombeAvanzate[numNemici], navicella, valore_letto, missili[2];
     navicella.x=-1;
-    int i, vite=3, n, j, statoNemico[numNemici], vitaNemici[numNemici][4];
+    int i, punti=0, cicli=1, vite=3, n, j, statoNemico[numNemici], vitaNemici[numNemici][4];
     for(i=0; i<numNemici; i++){
         statoNemico[i]=0;
         nemico[i].x=-1;
@@ -357,6 +357,7 @@ void controllo(int pipein, int maxx, int maxy){
     //stampa vite
     mvprintw(0, 1, "Vite: %d", vite);
     mvprintw(0, 10, "Nemici: %d  ", nemiciVivi);
+    mvprintw(0, maxx-15, "Punti: %d   ", punti);
     for(i=0; i<maxx; i++){
         mvprintw(1, i, "-");
     }
@@ -551,7 +552,7 @@ void controllo(int pipein, int maxx, int maxy){
                                 for (j = 0; j < 3; j++) {
                                     mvprintw(nemico[i].y + j, nemico[i].x, SpriteNemicoMorente[j]);
                                 }
-
+                                punti+=500;
                                 refresh();
                                 usleep(30000);
                                 /*for (j = 0; j < 3; j++) {
@@ -586,6 +587,7 @@ void controllo(int pipein, int maxx, int maxy){
                                 }
                                 vitaNemici[i][0]=0;
                                 nemiciVivi--;
+                                punti+=200;
                             }
                             //secondo check enorme
                             if(vitaNemici[i][1]==1 && ((nemico[i].x + 4 == missili[n].x && nemico[i].y == missili[n].y) ||
@@ -606,6 +608,7 @@ void controllo(int pipein, int maxx, int maxy){
                                 }
                                 vitaNemici[i][1]=0;
                                 nemiciVivi--;
+                                punti+=200;
                             }
 
                             if(vitaNemici[i][2]==1 && ((nemico[i].x == missili[n].x && nemico[i].y + 4 == missili[n].y) ||
@@ -626,6 +629,7 @@ void controllo(int pipein, int maxx, int maxy){
                                 }
                                 vitaNemici[i][2]=0;
                                 nemiciVivi--;
+                                punti+=200;
                             }
 
                             if(vitaNemici[i][3]==1 && ((nemico[i].x + 4== missili[n].x && nemico[i].y + 4 == missili[n].y) ||
@@ -646,6 +650,7 @@ void controllo(int pipein, int maxx, int maxy){
                                 }
                                 vitaNemici[i][3]=0;
                                 nemiciVivi--;
+                                punti+=200;
                             }
 
                             if(vitaNemici[i][0]==0 && vitaNemici[i][1]==0 && vitaNemici[i][2]==0 && vitaNemici[i][3]==0){
@@ -771,9 +776,16 @@ void controllo(int pipein, int maxx, int maxy){
                 }
                 break;
         }
-        //stampa vite aggiornate
+        //ogni tot cicli i punti vengono decrementati
+        if(!(cicli++%1000)){
+            if(punti>0){
+                punti--;
+            }
+        }
+        //stampa info aggiornate
         mvprintw(0, 1, "Vite: %d", vite);
         mvprintw(0, 10, "Nemici: %d  ", nemiciVivi);
+        mvprintw(0, maxx-15, "Punti: %d   ", punti);
         for(i=0; i<maxx; i++){
             mvprintw(1, i, "-");
         }
