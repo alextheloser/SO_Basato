@@ -1,5 +1,11 @@
-#ifndef SO_BASATO_CONTROLLO_H
-#define SO_BASATO_CONTROLLO_H
+#include <stdio.h>
+#include <ncurses.h>
+#include <stdlib.h>
+#include <signal.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/wait.h>
+#include <time.h>
 
 #define PASSO 1
 
@@ -54,5 +60,3 @@ char SpriteNemicoAvanzato[4][4]={
 char SpriteMissile='>';
 
 char SpriteBomba='@';
-
-#endif //SO_BASATO_CONTROLLO_H

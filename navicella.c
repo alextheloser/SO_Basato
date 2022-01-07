@@ -110,7 +110,7 @@ void missile(int pipeout, int maxx, int maxy, int navx, int navy, int diry){
         if(i%6==0){
             pos_missile.y+=diry;
         }
-        pos_missile.x+=1;
+        pos_missile.x+=PASSO;
         i++;
         //scrivo nella pipe le informazioni aggiornate.
         write(pipeout, &pos_missile, sizeof(pos_missile));

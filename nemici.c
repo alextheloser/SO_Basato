@@ -1,4 +1,4 @@
-#include "nemici.h."
+#include "nemici.h"
 
 /**
  * Funzione che si occupa di generare le coordinate di una navicella nemica.
@@ -99,7 +99,7 @@ void bomba(int pipeout, int x_bomba, int y_bomba, int id, int type){
     //la bomba continua a muoversi fino a che non raggiunge il limite sinistro dello schermo.
     while(!(pos_bomba.x<0)){
         //effettuo lo spostamento della bomba.
-        pos_bomba.x-=1;
+        pos_bomba.x-=PASSO;
         //scrivo nella pipe le informazioni aggiornate.
         write(pipeout, &pos_bomba, sizeof(pos_bomba));
         //delay dello spostamento della bomba.
