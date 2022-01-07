@@ -21,14 +21,11 @@ typedef struct{
 
 
 int menu();
-void navicella(int pipeout, int maxx, int maxy);
-void nemiciPrimoLivello(int pipeout, int x, int y, int idNemico, int maxx, int maxy);
-void nemiciSecondoLivello(int pipeout, int x, int y, int idNemico, int maxx, int maxy);
-void controllo(int pipein, int maxx, int maxy);
-void missile(int pipeout, int maxx, int maxy, int navx, int navy, int diry);
-void bomba(int pipeout, int x_bomba, int y_bomba, int id, int type);
-
-int numNemici=6;
+void nemici(int pipeout, int x, int y, int idNemico, int maxx, int maxy); //fatto
+void controllo(int pipein, int maxx, int maxy, int numNemici);
+void navicella(int pipeout, int maxx, int maxy); //fatto
+void missile(int pipeout, int maxx, int maxy, int navx, int navy, int diry); //fatto
+void bomba(int pipeout, int x_bomba, int y_bomba, int id, int type); //fatto
 
 char SpriteNavicella[6][6]={
         "<-\\",
@@ -79,7 +76,7 @@ char* logo[]={"   _____                      _____        __               _    
                    "        |_|                                                             "};
 
 int main() {
-    int filedes[2], i, j=0, maxx, maxy, x_nemici, y_nemici, numColonne=1;
+    int filedes[2], i, j=0, maxx, maxy, x_nemici, y_nemici, numColonne=1, numNemici=6;;
     pid_t pid_navicella, pid_nemici[numNemici];
 
     initscr();
@@ -88,11 +85,13 @@ int main() {
     keypad(stdscr, 1); //funzione per leggere i tasti della tastiera
     curs_set(0);
     srand((int)time(NULL));
+
     start_color();
     init_pair(1,COLOR_WHITE,COLOR_BLACK);
     init_pair(2, COLOR_RED, COLOR_BLACK);
     init_pair(3, COLOR_CYAN, COLOR_BLACK);
     attron(COLOR_PAIR(1));
+
     getmaxyx(stdscr, maxy, maxx);
     x_nemici=maxx-7;
     y_nemici=3;
@@ -111,7 +110,7 @@ int main() {
                 exit(1);
             case 0:
                 close(filedes[0]);
-                nemiciPrimoLivello(filedes[1], x_nemici, y_nemici, i, maxx, maxy);
+                nemici(filedes[1], x_nemici, y_nemici, i, maxx, maxy);
             default:
                 break;
         }
@@ -133,8 +132,6 @@ int main() {
         }
     }
 
-
-
     pid_navicella=fork();
     switch(pid_navicella){
         case -1:
@@ -145,7 +142,7 @@ int main() {
             navicella(filedes[1], maxx, maxy);
         default:
             close(filedes[1]);
-            controllo(filedes[0], maxx, maxy);
+            controllo(filedes[0], maxx, maxy, numNemici);
     }
 
     for(i=0; i<numNemici; i++){
@@ -156,13 +153,11 @@ int main() {
     return 0;
 }
 
-
-
 /**
- * Funzione che si occupa di generare le coordinate della navicella
- * @param pipeout File descriptor in scrittura della pipe
- * @param maxx Massimo valore delle X sullo schermo
- * @param maxy Massimo valore delle Y sullo schermo
+ * Funzione che si occupa di generare le coordinate della navicella.
+ * @param pipeout File descriptor in scrittura della pipe.
+ * @param maxx Massimo valore delle X sullo schermo.
+ * @param maxy Massimo valore delle Y sullo schermo.
  */
 void navicella(int pipeout, int maxx, int maxy){
     Position pos_navicella;
@@ -233,7 +228,7 @@ void navicella(int pipeout, int maxx, int maxy){
  * @param maxx Massimo valore delle X sullo schermo
  * @param maxy Massimo valore delle Y sullo schermo
  */
-void nemiciPrimoLivello(int pipeout, int x, int y, int idNemico, int maxx, int maxy){
+void nemici(int pipeout, int x, int y, int idNemico, int maxx, int maxy){
     Position pos_nemico;
     pos_nemico.x=x;
     pos_nemico.y=y;
@@ -283,63 +278,14 @@ void nemiciPrimoLivello(int pipeout, int x, int y, int idNemico, int maxx, int m
         usleep(800000);
     }
 }
-/*
-void nemiciSecondoLivello(int pipeout, int x, int y, int idNemico, int maxx, int maxy){
-    Position pos_nemicoAvanzato;
-    pos_nemicoAvanzato.x=x;
-    pos_nemicoAvanzato.y=y;
-    pos_nemicoAvanzato.i=NemicoAvanzato;
-    pos_nemicoAvanzato.id=idNemico;
-    pos_nemicoAvanzato.pid=getpid();
-    pid_t pid_bomba[2];
-    int r=1, dirx, diry, cicli=1, i;
 
-    write(pipeout, &pos_nemicoAvanzato, sizeof(pos_nemicoAvanzato));
-    while(1){
-        dirx=-PASSO;
-        pos_nemicoAvanzato.x+=dirx;
-        if(r%2==0)
-            diry=PASSO;
-        else
-            diry=-PASSO;
-        if(pos_nemicoAvanzato.y+diry<2 || pos_nemicoAvanzato.y+diry>=maxy)
-            diry=-diry;
-        pos_nemicoAvanzato.y+=diry;
-        r++;
-
-        if(!(cicli++%5)){
-            pid_bomba[0]=fork();
-            switch(pid_bomba[0]){
-                case -1:
-                    perror("Errore nell'esecuzione della fork!");
-                    exit(1);
-                case 0:
-                    bomba(pipeout, pos_nemicoAvanzato.x-1, pos_nemicoAvanzato.y, idNemico);
-                default:
-                    pid_bomba[1]=fork();
-                    switch(pid_bomba[1]){
-                        case -1:
-                            perror("Errore nell'esecuzione della fork!");
-                            exit(1);
-                        case 0:
-                            bomba(pipeout, pos_nemicoAvanzato.x-1, pos_nemicoAvanzato.y+2, idNemico);
-                        default:
-                            break;
-                    }
-            }
-        }
-        write(pipeout,&pos_nemicoAvanzato,sizeof(pos_nemicoAvanzato));
-        usleep(1200000);
-    }
-}
-*/
 /**
  * Funzione che si occupa della stampa dei vari elementi a schermo e delle collisioni
  * @param pipein File descriptor in lettura della pipe
  * @param maxx Massimo valore delle X sullo schermo
  * @param maxy Massimo valore delle Y sullo schermo
  */
-void controllo(int pipein, int maxx, int maxy){
+void controllo(int pipein, int maxx, int maxy, int numNemici){
 
     Position nemico[numNemici], bombe[numNemici], bombeAvanzate[numNemici], navicella, valore_letto, missili[2];
     navicella.x=-1;
@@ -446,7 +392,7 @@ void controllo(int pipein, int maxx, int maxy){
                         break;
                 }
                 attron(COLOR_PAIR(1));
-                if(nemico[valore_letto.id].x<0){
+                if(nemico[valore_letto.id].x<2){
                     vite=0;
                 }
                 break;
@@ -687,38 +633,31 @@ void controllo(int pipein, int maxx, int maxy){
                         bombe[i].y=-1;
                         //termino il processo che gestisce la bomba
                         kill(bombe[i].pid, 1);
-
-                        int v=i;
-                        i=0;
-                        attron(COLOR_PAIR(3));
-
-                        switch(vite) {
-
-                            case 2:
-                                //elimino la navicella dalle coordinate vecchie
-                                for (i = 0; i < 3; i++) {
-                                    mvprintw(navicella.y + i, navicella.x, "     ");
-                                }
-                                //stampo la navicella
-                                for (i = 0; i < 3; i++) {
-                                    mvprintw(navicella.y + i, navicella.x, SpriteNavicellaDmgd2[i]);
-                                }
-                                break;
-                            case 1:
-                                //elimino la navicella dalle coordinate vecchie
-                                for (i = 0; i < 3; i++) {
-                                    mvprintw(navicella.y + i, navicella.x, "     ");
-                                }
-                                //stampo la navicella
-                                for (i = 0; i < 3; i++) {
-                                    mvprintw(navicella.y + i, navicella.x, SpriteNavicellaDmgd3[i]);
-                                }
-                                break;
-                        }
-                        i=v;
-
                     }
+                }
+                attron(COLOR_PAIR(3));
+                switch(vite) {
 
+                    case 2:
+                        //elimino la navicella dalle coordinate vecchie
+                        for (i = 0; i < 3; i++) {
+                            mvprintw(navicella.y + i, navicella.x, "     ");
+                        }
+                        //stampo la navicella
+                        for (i = 0; i < 3; i++) {
+                            mvprintw(navicella.y + i, navicella.x, SpriteNavicellaDmgd2[i]);
+                        }
+                        break;
+                    case 1:
+                        //elimino la navicella dalle coordinate vecchie
+                        for (i = 0; i < 3; i++) {
+                            mvprintw(navicella.y + i, navicella.x, "     ");
+                        }
+                        //stampo la navicella
+                        for (i = 0; i < 3; i++) {
+                            mvprintw(navicella.y + i, navicella.x, SpriteNavicellaDmgd3[i]);
+                        }
+                        break;
                 }
                 attron(COLOR_PAIR(1));
                 break;
@@ -739,45 +678,38 @@ void controllo(int pipein, int maxx, int maxy){
                             bombeAvanzate[i].y=-1;
                             //termino il processo che gestisce la bomba
                             kill(bombeAvanzate[i].pid, 1);
-
-                            int v=i;
-                            i=0;
-                            attron(COLOR_PAIR(3));
-
-                            switch(vite) {
-
-                                case 2:
-                                    //elimino la navicella dalle coordinate vecchie
-                                    for (i = 0; i < 3; i++) {
-                                        mvprintw(navicella.y + i, navicella.x, "     ");
-                                    }
-                                    //stampo la navicella
-                                    for (i = 0; i < 3; i++) {
-                                        mvprintw(navicella.y + i, navicella.x, SpriteNavicellaDmgd2[i]);
-                                    }
-                                    break;
-                                case 1:
-                                    //elimino la navicella dalle coordinate vecchie
-                                    for (i = 0; i < 3; i++) {
-                                        mvprintw(navicella.y + i, navicella.x, "     ");
-                                    }
-                                    //stampo la navicella
-                                    for (i = 0; i < 3; i++) {
-                                        mvprintw(navicella.y + i, navicella.x, SpriteNavicellaDmgd3[i]);
-                                    }
-                                    break;
-                            }
-                            i=v;
-
                         }
+                    }
+                    attron(COLOR_PAIR(3));
+                    switch(vite) {
 
+                        case 2:
+                            //elimino la navicella dalle coordinate vecchie
+                            for (i = 0; i < 3; i++) {
+                                mvprintw(navicella.y + i, navicella.x, "     ");
+                            }
+                            //stampo la navicella
+                            for (i = 0; i < 3; i++) {
+                                mvprintw(navicella.y + i, navicella.x, SpriteNavicellaDmgd2[i]);
+                            }
+                            break;
+                        case 1:
+                            //elimino la navicella dalle coordinate vecchie
+                            for (i = 0; i < 3; i++) {
+                                mvprintw(navicella.y + i, navicella.x, "     ");
+                            }
+                            //stampo la navicella
+                            for (i = 0; i < 3; i++) {
+                                mvprintw(navicella.y + i, navicella.x, SpriteNavicellaDmgd3[i]);
+                            }
+                            break;
                     }
                     attron(COLOR_PAIR(1));
                 }
                 break;
         }
         //ogni tot cicli i punti vengono decrementati
-        if(!(cicli++%1000)){
+        if(!(cicli++%500)){
             if(punti>0){
                 punti--;
             }
@@ -794,22 +726,36 @@ void controllo(int pipein, int maxx, int maxy){
     //stampa messaggio di game over
 }
 
+/**
+ * Funzione che si occupa di generare le coordinate di un missile.
+ * @param pipeout File descriptor in scrittura della pipe.
+ * @param maxx Massimo valore delle X sullo schermo.
+ * @param maxy Massimo valore delle Y sullo schermo.
+ * @param navx Coordinata X della navicella che spara il missile.
+ * @param navy Coordinata Y della navicella che spara il missile.
+ * @param diry Direzione verticale del missile (se pari ad 1 il missile va in alto, pari a -1 va verso il basso).
+ */
 void missile(int pipeout, int maxx, int maxy, int navx, int navy, int diry){
 
     Position pos_missile;
+    //assegno le informazioni del missile alla variabile pos_missile
     pos_missile.x=5+navx;
     pos_missile.y=1+navy;
     pos_missile.i=Missile;
     pos_missile.pid=getpid();
+    int i=0;
+    //definisco quale dei due missili sparati dalla navicella si tratta
     if(diry==1){
         pos_missile.id=0;
     }
     else{
         pos_missile.id=1;
     }
-    int i=0;
+    //scrivo nella pipe le informazioni iniziali
     write(pipeout, &pos_missile, sizeof(pos_missile));
+    //il missile continua a muoversi fino a che non raggiunge il limite destro dello schermo
     while(!(pos_missile.x>maxx)){
+        //effettuo lo spostamento del missile
         if(pos_missile.y+diry>maxy || pos_missile.y+diry<2) {
             diry=-diry;
         }
@@ -817,11 +763,13 @@ void missile(int pipeout, int maxx, int maxy, int navx, int navy, int diry){
             pos_missile.y+=diry;
         }
         pos_missile.x+=1;
-        write(pipeout, &pos_missile, sizeof(pos_missile));
-        usleep(10000);
         i++;
+        //scrivo nella pipe le informazioni aggiornate
+        write(pipeout, &pos_missile, sizeof(pos_missile));
+        //delay dello spostamento del missile
+        usleep(10000);
     }
-    //kill(getpid(),SIGKILL);
+    //il processo viene terminato
     exit(1);
 
 }

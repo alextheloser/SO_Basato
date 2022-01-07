@@ -3,16 +3,10 @@
 
 #define KEY_UP 65
 #define KEY_DOWN 66
-#define MAXX 80
-#define MAXY 24
+#define DELAY_MISSILE 10000
 
-void navicella(int pipeout);
+void navicella(int pipeout, int maxx, int maxy);
+void missile(int pipeout, int maxx, int maxy, int navx, int navy, int diry);
 
-char SpriteNavicella[3][4]={"---\n", " | >\n", "---\n"};
-/*
----
- | >
----
-*/
 
 #endif //SO_BASATO_NAVICELLA_H
