@@ -6,7 +6,7 @@
  * @param maxx Massimo valore delle X sullo schermo.
  * @param maxy Massimo valore delle Y sullo schermo.
  */
-void controllo(int pipein, int maxx, int maxy, int numNemici){
+void controllo(int pipein, int maxx, int maxy, int numNemici, int valoreDifficolta){
 
     //dichiarazione delle variabili dove verranno salvate le informazioni lette dalla pipe.
     Position nemico[numNemici], bombe[numNemici], bombeAvanzate[numNemici], navicella, valore_letto, missili[2];
@@ -26,10 +26,11 @@ void controllo(int pipein, int maxx, int maxy, int numNemici){
             vitaNemici[i][j]=1;
         }
     }
-    int nemiciVivi=numNemici;
+    int nemiciVivi=numNemici, nemiciSecLiv=0;
     //stampa delle informazioni iniziali
     mvprintw(0, 1, "Vite: %d", vite);
     mvprintw(0, 10, "Nemici: %d  ", nemiciVivi);
+    mvprintw(0, 40, "Nemici secondo livello: %d  ", nemiciSecLiv);
     mvprintw(0, maxx-15, "Punti: %d   ", punti);
     for(i=0; i<maxx; i++){
         mvprintw(1, i, "-");
@@ -232,6 +233,7 @@ void controllo(int pipein, int maxx, int maxy, int numNemici){
                                 (nemico[i].x + 2 == missili[n].x && nemico[i].y + 2 == missili[n].y)) {
                                 //aggiorno il numero di nemici presenti a schermo.
                                 nemiciVivi+=3;
+                                nemiciSecLiv+=4;
                                 //elimino dallo schermo il missile.
                                 mvaddch(missili[n].y, missili[n].x, ' ');
                                 //termino il processo che gestiva il missile.
@@ -245,8 +247,18 @@ void controllo(int pipein, int maxx, int maxy, int numNemici){
                                 for (j = 0; j < 3; j++) {
                                     mvprintw(nemico[i].y + j, nemico[i].x, SpriteNemicoMorente[j]);
                                 }
-                                //aggiungo i punti dati dal nemico colpito.
-                                punti+=500;
+                                //aggiungo i punti dati dal nemico colpito in base alla difficoltà.
+                                switch(valoreDifficolta){
+                                    case 0:
+                                        punti+=200;
+                                        break;
+                                    case 1:
+                                        punti+=400;
+                                        break;
+                                    case 2:
+                                        punti+=500;
+                                        break;
+                                }
                                 //aggiorno lo schermo.
                                 refresh();
                                 //imposto un delay per far vedere il nemico morente.
@@ -284,8 +296,19 @@ void controllo(int pipein, int maxx, int maxy, int numNemici){
                                 vitaNemici[i][0]=0;
                                 //diminuisco il numero di nemici vivi.
                                 nemiciVivi--;
-                                //aggiungo i punti dati dal nemico colpito.
-                                punti+=200;
+                                nemiciSecLiv--;
+                                //aggiungo i punti dati dal nemico colpito in base alla difficoltà.
+                                switch(valoreDifficolta){
+                                    case 0:
+                                        punti+=70;
+                                        break;
+                                    case 1:
+                                        punti+=150;
+                                        break;
+                                    case 2:
+                                        punti+=250;
+                                        break;
+                                }
                             }
                             //collisione missile-nemico di secondo livello in alto a destra.
                             if(vitaNemici[i][1]==1 && ((nemico[i].x + 4 == missili[n].x && nemico[i].y == missili[n].y) ||
@@ -312,8 +335,19 @@ void controllo(int pipein, int maxx, int maxy, int numNemici){
                                 vitaNemici[i][1]=0;
                                 //diminuisco il numero di nemici vivi.
                                 nemiciVivi--;
-                                //aggiungo i punti dati dal nemico colpito.
-                                punti+=200;
+                                nemiciSecLiv--;
+                                //aggiungo i punti dati dal nemico colpito in base alla difficoltà.
+                                switch(valoreDifficolta){
+                                    case 0:
+                                        punti+=70;
+                                        break;
+                                    case 1:
+                                        punti+=150;
+                                        break;
+                                    case 2:
+                                        punti+=250;
+                                        break;
+                                }
                             }
                             //collisione missile-nemico di secondo livello in basso a sinistra.
                             if(vitaNemici[i][2]==1 && ((nemico[i].x == missili[n].x && nemico[i].y + 4 == missili[n].y) ||
@@ -340,8 +374,19 @@ void controllo(int pipein, int maxx, int maxy, int numNemici){
                                 vitaNemici[i][2]=0;
                                 //diminuisco il numero di nemici vivi.
                                 nemiciVivi--;
-                                //aggiungo i punti dati dal nemico colpito.
-                                punti+=200;
+                                nemiciSecLiv--;
+                                //aggiungo i punti dati dal nemico colpito in base alla difficoltà.
+                                switch(valoreDifficolta){
+                                    case 0:
+                                        punti+=70;
+                                        break;
+                                    case 1:
+                                        punti+=150;
+                                        break;
+                                    case 2:
+                                        punti+=250;
+                                        break;
+                                }
                             }
                             //collisione missile-nemico di secondo livello in basso a destra.
                             if(vitaNemici[i][3]==1 && ((nemico[i].x + 4== missili[n].x && nemico[i].y + 4 == missili[n].y) ||
@@ -368,8 +413,19 @@ void controllo(int pipein, int maxx, int maxy, int numNemici){
                                 vitaNemici[i][3]=0;
                                 //diminuisco il numero di nemici vivi.
                                 nemiciVivi--;
-                                //aggiungo i punti dati dal nemico colpito.
-                                punti+=200;
+                                nemiciSecLiv--;
+                                //aggiungo i punti dati dal nemico colpito in base alla difficoltà.
+                                switch(valoreDifficolta){
+                                    case 0:
+                                        punti+=70;
+                                        break;
+                                    case 1:
+                                        punti+=150;
+                                        break;
+                                    case 2:
+                                        punti+=250;
+                                        break;
+                                }
                             }
                             //se il blocco di nemici di secondo livello gestiti da un processo viene distrutto.
                             if(vitaNemici[i][0]==0 && vitaNemici[i][1]==0 && vitaNemici[i][2]==0 && vitaNemici[i][3]==0){
@@ -491,12 +547,215 @@ void controllo(int pipein, int maxx, int maxy, int numNemici){
         //stampa delle informazioni aggiornate.
         mvprintw(0, 1, "Vite: %d", vite);
         mvprintw(0, 10, "Nemici: %d  ", nemiciVivi);
+        mvprintw(0, 40, "Nemici secondo livello: %d  ", nemiciSecLiv);
         mvprintw(0, maxx-15, "Punti: %d   ", punti);
         for(i=0; i<maxx; i++){
             mvprintw(1, i, "-");
         }
         //aggiornamento degli elementi a schermo.
         refresh();
-    } while(vite>0 && nemiciVivi>0); //ciclo termina quando la navicella non ha più vite oppure quando tutti i nemici sono stati distrutti
+    } while(vite>0 && nemiciVivi>0); //ciclo termina quando la navicella non ha più vite oppure quando tutti i nemici sono stati distrutti.
 
+    //pulisco lo schermo.
+    clear();
+    //stampa di game over quando si perde.
+    if(vite==0){
+        attron(COLOR_PAIR(3));
+        for(i=0; i<7; i++){
+            mvprintw(maxy/2-10+i, maxx/2-50, gameover[i]);
+        }
+        attron(COLOR_PAIR(1));
+        mvprintw(maxy/2-2, maxx/2-15,"Hai totalizzato %d punti", punti);
+        refresh();
+        usleep(5000000);
+    }
+    //stampa di game over quando si vince.
+    else if(nemiciVivi==0 && valoreDifficolta!=3){
+        attron(COLOR_PAIR(3));
+        for(i=0; i<7; i++){
+            mvprintw(maxy/2-10+i, maxx/2-50, youwon[i]);
+        }
+        attron(COLOR_PAIR(1));
+        mvprintw(maxy/2-2, maxx/2-13,"Hai totalizzato %d punti", punti);
+        refresh();
+        usleep(5000000);
+    }
+
+}
+
+/**
+ * Funzione che si occupa del menù iniziale del gioco.
+ * @param maxx Massimo valore delle X sullo schermo.
+ * @param maxy Massimo valore delle Y sullo schermo.
+ * @return Numero che identifica la selezione della difficoltà.
+ */
+int menu(int maxx, int maxy){
+    //nel caso in cui lo schermo sia troppo piccolo viene visualizzato questo messaggio
+    if(maxx<150 || maxy<30){
+        while(1){
+            mvprintw(1,1,"Risoluzione troppo bassa");
+            mvprintw(2,1,"Prova a passare a schermo intero");
+            mvprintw(3,1,"Ridimensiona e riesegui :(");
+            refresh();
+        }
+    }
+    int isAnimationDone=0, scelta, numScelta=0, i, j=0;
+    while(1){
+        //stampa della linea superiore
+        attron(COLOR_PAIR(1));
+        mvprintw(0, 1, "SpaceDefenders");
+        mvprintw(0, (maxx/2)-33, "SpaceDefenders      Andrea Martis / Alessio Largiu      Unica 2021");
+
+        for(i=0; i<maxx; i++){
+            mvprintw(1, i, "-");
+        }
+
+        //stampa del logo
+        if(isAnimationDone==0){
+
+            usleep(10000);
+            for(i=8; i<15; i++){
+                attron(COLOR_PAIR(2));
+                for (j = 0; j < 8; j++) {
+                    mvprintw(i+j, (maxx/2)-63, logo[j]);
+                }
+                for (j = 0; j < 8; j++) {
+                    mvprintw(i+j-6,  (maxx/2)-63, "                                                                                                                               ");
+                }
+                usleep(80000);
+                refresh();
+            }
+            attron(COLOR_PAIR(1));
+        }
+
+        attron(COLOR_PAIR(3));
+        for (j = 0; j < 8; j++) {
+            mvprintw(i+j-1,  (maxx/2)-63, logo[j]);
+        }
+
+        //stampa della prima banda orizzontale
+        attron(COLOR_PAIR(2));
+        for(i=0; i<maxx; i++){
+            mvprintw(22, i, "+");
+            mvprintw(23, i, "+");
+            if(isAnimationDone==0){
+                usleep(10000);
+                refresh();
+            }
+        }
+        attron(COLOR_PAIR(1));
+
+        //stampa selezione della difficoltà
+        if(isAnimationDone==1){
+            mvprintw(25, (maxx/2)-16, "Seleziona la modalita' di gioco");
+
+            mvprintw(27, (maxx/2)-4, "Facile");
+            mvprintw(28, (maxx/2)-4, "Medio");
+            mvprintw(29, (maxx/2)-4, "Difficile");
+            mvprintw(30, (maxx/2)-4, "Esci");
+
+
+            switch(scelta){
+                case KEY_UP:
+                    numScelta--;
+                    if(numScelta<=0){
+                        numScelta=3;
+                    }
+                    break;
+
+                case KEY_DOWN:
+                    numScelta++;
+
+                    if(numScelta>3){
+                        numScelta=0;
+                    }
+                    break;
+
+                case 10:
+                    return numScelta;
+                    break;
+            }
+
+            //stampa del cursore
+            attron(COLOR_PAIR(3));
+            //int miStoComplicandoLaVita=0;
+            for(j=0; j<=3; j++){
+                if(j==numScelta){
+                    mvprintw(27+j, (maxx/2)-6, ">");
+                } else {
+                    mvprintw(27+j, (maxx/2)-6, " ");
+                }
+            }
+            attron(COLOR_PAIR(1));
+
+        }
+
+        //stampa della seconda banda orizzontale
+        attron(COLOR_PAIR(3));
+        for(i=maxx; i>=0; i--){
+            mvprintw(32, i, "+");
+            mvprintw(33, i, "+");
+            if(isAnimationDone==0){
+                usleep(10000);
+                refresh();
+            }
+        }
+        attron(COLOR_PAIR(1));
+
+        //animazione della navicella e del nemico
+        if(isAnimationDone==0){
+            for (i = 0; i < 3; i++) {
+                mvprintw(4 + i, 10, SpriteNavicella[i]);
+            }
+
+            for (i = 0; i < 3; i++) {
+                mvprintw(4 + i, 132, SpriteNemicoBase[i]);
+            }
+
+            for(i=0;i<=117;i++){
+                mvprintw(5, 16+i, ">");
+                usleep(20000);
+                mvprintw(5, 16+i-1, " ");
+                refresh();
+
+            }
+
+            mvprintw(5,133," ");
+
+            for (i = 0; i < 3; i++) {
+                mvprintw(4 + i, 132, SpriteNemicoMorente[i]);
+            }
+            refresh();
+            usleep(200000);
+            for (i = 0; i < 3; i++) {
+                mvprintw(4 + i, 132, "    ");
+            }
+            refresh();
+            for(j=0; j<(maxx/2);j++){
+                for (i = 0; i < 3; i++) {
+                    mvprintw(4 + i, j+10, SpriteNavicella[i]);
+                }
+                for (i = 0; i < 3; i++) {
+                    mvprintw(4 + i, 2-j+10, "    ");
+                }
+                refresh();
+                usleep(10000);
+            }
+        }
+
+        if(isAnimationDone==1){
+            for (i = 0; i < 3; i++) {
+                mvprintw(4 + i, maxx/2+10, SpriteNavicella[i]);
+            }
+
+        }
+
+        timeout(100);
+        scelta=getch();
+
+        usleep(10000);
+
+        refresh();
+        isAnimationDone=1;
+    }
 }

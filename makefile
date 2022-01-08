@@ -1,5 +1,8 @@
-SpaceDefender: main.c controllo.o nemici.o navicella.o
-	gcc -o SpaceDefender main.c controllo.o nemici.o navicella.o -lncurses
+SpaceDefender: main.o controllo.o nemici.o navicella.o
+	gcc -o SpaceDefender main.o controllo.o nemici.o navicella.o -lncurses
+
+main.o: main.c
+	gcc -c -o main.o main.c
 
 navicella.o: navicella.c navicella.h
 	gcc -c -o navicella.o navicella.c
