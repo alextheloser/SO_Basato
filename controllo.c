@@ -658,7 +658,7 @@ int menu(int maxx, int maxy){
             switch(scelta){
                 case KEY_UP:
                     numScelta--;
-                    if(numScelta<=0){
+                    if(numScelta<0){
                         numScelta=3;
                     }
                     break;
