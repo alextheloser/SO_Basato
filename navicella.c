@@ -21,6 +21,7 @@ void navicella(int pipeout, int maxx, int maxy){
 
     while(1) {
         //acquisisco un carattere dalla tastiera.
+        timeout(100);
         c=getch();
         switch(c) {
             //movimento verso l'alto.

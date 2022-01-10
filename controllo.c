@@ -558,6 +558,7 @@ void controllo(int pipein, int maxx, int maxy, int numNemici, int valoreDifficol
 
     //pulisco lo schermo.
     clear();
+    int exit=0;
     //stampa di game over quando si perde.
     if(vite==0){
         attron(COLOR_PAIR(3));
@@ -565,9 +566,14 @@ void controllo(int pipein, int maxx, int maxy, int numNemici, int valoreDifficol
             mvprintw(maxy/2-10+i, maxx/2-50, gameover[i]);
         }
         attron(COLOR_PAIR(1));
+        while(exit!=32){
         mvprintw(maxy/2-2, maxx/2-15,"Hai totalizzato %d punti", punti);
+        mvprintw(maxy/2, maxx/2-15,"Premi spazio per uscire");
+        timeout(100);
+        exit=getch();
         refresh();
-        usleep(5000000);
+    }
+
     }
     //stampa di game over quando si vince.
     else if(nemiciVivi==0 && valoreDifficolta!=3){
@@ -576,9 +582,13 @@ void controllo(int pipein, int maxx, int maxy, int numNemici, int valoreDifficol
             mvprintw(maxy/2-10+i, maxx/2-50, youwon[i]);
         }
         attron(COLOR_PAIR(1));
+        while(exit!=32){
         mvprintw(maxy/2-2, maxx/2-13,"Hai totalizzato %d punti", punti);
+        mvprintw(maxy/2, maxx/2-15,"Premi spazio per uscire");
+        timeout(100);
+        exit=getch();
         refresh();
-        usleep(5000000);
+        }
     }
 
 }
