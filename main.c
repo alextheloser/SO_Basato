@@ -7,7 +7,6 @@
 #include <time.h>
 
 int menu(int maxx, int maxy);
-void gameover();
 void navicella(int pipeout, int maxx, int maxy);
 void nemici(int pipeout, int x, int y, int idNemico, int maxx, int maxy);
 void controllo(int pipein, int maxx, int maxy, int numNemici, int valoreDifficolta);
