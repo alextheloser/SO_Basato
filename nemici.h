@@ -8,7 +8,7 @@
 #include <time.h>
 
 #define PASSO 1
-#define DELAY_NEMICI 800000
+#define DELAY_NEMICI 1200000
 #define DELAY_BOMBA 20000
 
 typedef enum {Navicella, Nemico, Missile, Bomba, BombaAvanzata}identity;

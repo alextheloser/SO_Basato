@@ -21,25 +21,25 @@ void navicella(int pipeout, int maxx, int maxy){
 
     while(1) {
         //acquisisco un carattere dalla tastiera.
-        timeout(100);
+        timeout(1000);
         c=getch();
         switch(c) {
             //movimento verso l'alto.
             case KEY_UP:
-                if (pos_navicella.y > 2) {
+                if (pos_navicella.y > 3) {
                     pos_navicella.y--;
                 }
                 break;
             //movimento verso il basso.
             case KEY_DOWN:
-                if (pos_navicella.y < maxy - 3) {
+                if (pos_navicella.y < maxy - 4) {
                     pos_navicella.y++;
                 }
                 break;
             //quando viene premuto spazio vengono generati i missili.
             case ' ':
                 //i missili vengono sparati solo se non ci sono altri missili sullo schermo.
-                if ((isMissileVivo1==0 || isMissileVivo2==0) || (waitpid(pid_missile1,&sig1,WNOHANG)==pid_missile1 && waitpid(pid_missile2,&sig2,WNOHANG)==pid_missile2)){
+                if (isMissileVivo1==0 || isMissileVivo2==0){
                     isMissileVivo1=1;
                     isMissileVivo2=1;
                     //creo il processo del primo missile.
@@ -69,6 +69,16 @@ void navicella(int pipeout, int maxx, int maxy){
                     }
                 }
                 break;
+        }
+        waitpid(pid_missile1,&sig1,WNOHANG);
+        waitpid(pid_missile2,&sig2,WNOHANG);
+        if(WEXITSTATUS(sig1)==1){
+            isMissileVivo1=0;
+            sig1=0;
+        }
+        if(WEXITSTATUS(sig2)==2){
+            isMissileVivo2=0;
+            sig2=0;
         }
         //scrivo nella pipe le informazioni aggiornate.
         write(pipeout,&pos_navicella,sizeof(pos_navicella));
@@ -119,6 +129,11 @@ void missile(int pipeout, int maxx, int maxy, int navx, int navy, int diry){
         usleep(DELAY_MISSILE);
     }
     //il processo viene terminato quando esce dal while.
-    exit(1);
+    if(pos_missile.id==0) {
+        exit(1);
+    }
+    else{
+        exit(2);
+    }
 
 }

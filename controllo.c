@@ -199,8 +199,8 @@ void controllo(int pipein, int maxx, int maxy, int numNemici, int valoreDifficol
                             //termino il processo che gestiva la bomba.
                             kill(bombe[i].pid, 1);
                             //imposto le coordnate del missile e della bomba fuori dallo schermo.
-                            missili[n].x = -1;
-                            missili[n].y = -1;
+                            missili[n].x = -30;
+                            missili[n].y = -30;
                             bombe[i].x = -1;
                             bombe[i].y = -1;
                         }
@@ -214,8 +214,8 @@ void controllo(int pipein, int maxx, int maxy, int numNemici, int valoreDifficol
                                 //termino il processo che gestiva la bomba.
                                 kill(bombeAvanzate[i].pid, 1);
                                 //imposto le coordnate del missile e della bomba fuori dallo schermo.
-                                missili[n].x = -1;
-                                missili[n].y = -1;
+                                missili[n].x = -30;
+                                missili[n].y = -30;
                                 bombeAvanzate[i].x = -1;
                                 bombeAvanzate[i].y = -1;
                             }
@@ -239,8 +239,8 @@ void controllo(int pipein, int maxx, int maxy, int numNemici, int valoreDifficol
                                 //termino il processo che gestiva il missile.
                                 kill(missili[n].pid, 1);
                                 //imposto le coordnate del missile dallo schermo.
-                                missili[n].x = -1;
-                                missili[n].y = -1;
+                                missili[n].x = -30;
+                                missili[n].y = -30;
                                 //imposto il colore per la stampa del nemico.
                                 attron(COLOR_PAIR(2));
                                 //stampa dello sprite del nemico morente.
@@ -286,8 +286,8 @@ void controllo(int pipein, int maxx, int maxy, int numNemici, int valoreDifficol
                                 //termino il processo che gestiva il missile.
                                 kill(missili[n].pid, 1);
                                 //imposto le coordnate del missile dallo schermo.
-                                missili[n].x = -1;
-                                missili[n].y = -1;
+                                missili[n].x = -30;
+                                missili[n].y = -30;
                                 //elimino dallo schermo il nemico di secondo livello colpito.
                                 for (j = 0; j < 3; j++) {
                                     mvprintw(nemico[i].y + j, nemico[i].x, "   ");
@@ -325,8 +325,8 @@ void controllo(int pipein, int maxx, int maxy, int numNemici, int valoreDifficol
                                 //termino il processo che gestiva il missile.
                                 kill(missili[n].pid, 1);
                                 //imposto le coordnate del missile dallo schermo.
-                                missili[n].x = -1;
-                                missili[n].y = -1;
+                                missili[n].x = -30;
+                                missili[n].y = -30;
                                 //elimino dallo schermo il nemico di secondo livello colpito.
                                 for (j = 0; j < 3; j++) {
                                     mvprintw(nemico[i].y + j, nemico[i].x + 4, "   ");
@@ -364,8 +364,8 @@ void controllo(int pipein, int maxx, int maxy, int numNemici, int valoreDifficol
                                 //termino il processo che gestiva il missile.
                                 kill(missili[n].pid, 1);
                                 //imposto le coordnate del missile dallo schermo.
-                                missili[n].x = -1;
-                                missili[n].y = -1;
+                                missili[n].x = -30;
+                                missili[n].y = -30;
                                 //elimino dallo schermo il nemico di secondo livello colpito.
                                 for (j = 0; j < 3; j++) {
                                     mvprintw(nemico[i].y + j + 4, nemico[i].x, "   ");
@@ -403,8 +403,8 @@ void controllo(int pipein, int maxx, int maxy, int numNemici, int valoreDifficol
                                 //termino il processo che gestiva il missile.
                                 kill(missili[n].pid, 1);
                                 //imposto le coordnate del missile dallo schermo.
-                                missili[n].x = -1;
-                                missili[n].y = -1;
+                                missili[n].x = -30;
+                                missili[n].y = -30;
                                 //elimino dallo schermo il nemico di secondo livello colpito.
                                 for (j = 0; j < 3; j++) {
                                     mvprintw(nemico[i].y + j + 4, nemico[i].x + 4, "   ");
@@ -430,12 +430,19 @@ void controllo(int pipein, int maxx, int maxy, int numNemici, int valoreDifficol
                             //se il blocco di nemici di secondo livello gestiti da un processo viene distrutto.
                             if(vitaNemici[i][0]==0 && vitaNemici[i][1]==0 && vitaNemici[i][2]==0 && vitaNemici[i][3]==0){
                                 mvprintw(nemico[i].y+3, nemico[i].x+3, " ");
-                                //imposto le coordinate deli nemici fuori dallo schermo.
+                                mvprintw(bombe[i].y, bombe[i].x, " ");
+                                mvprintw(bombeAvanzate[i].y, bombeAvanzate[i].x, " ");
+                                //termino il processo che gestiva i nemici e delle bombe generate da essi.
+                                kill(nemico[i].pid, 1);
+                                kill(bombe[i].pid, 1);
+                                kill(bombeAvanzate[i].pid, 1);
+                                //imposto le coordinate dei nemici e delle bombe fuori dallo schermo.
                                 nemico[i].x=-10;
                                 nemico[i].y=-10;
-
-                                //termino il processo che gestiva i nemici.
-                                kill(nemico[i].pid, 1);
+                                bombe[i].x=-1;
+                                bombe[i].y=-1;
+                                bombeAvanzate[i].x=-1;
+                                bombeAvanzate[i].y=-1;
                                 //aggiorno lo schermo.
                                 refresh();
                                 //modifico lo stato del nemico colpito da secondo livello a distrutto.
@@ -558,7 +565,7 @@ void controllo(int pipein, int maxx, int maxy, int numNemici, int valoreDifficol
 
     //pulisco lo schermo.
     clear();
-    int exit=0;
+    int uscita=0;
     //stampa di game over quando si perde.
     if(vite==0){
         attron(COLOR_PAIR(3));
@@ -566,13 +573,13 @@ void controllo(int pipein, int maxx, int maxy, int numNemici, int valoreDifficol
             mvprintw(maxy/2-10+i, maxx/2-50, gameover[i]);
         }
         attron(COLOR_PAIR(1));
-        while(exit!=32){
-        mvprintw(maxy/2-2, maxx/2-15,"Hai totalizzato %d punti", punti);
-        mvprintw(maxy/2, maxx/2-15,"Premi spazio per uscire");
-        timeout(100);
-        exit=getch();
-        refresh();
-    }
+        while(uscita!=32){
+            mvprintw(maxy/2-2, maxx/2-13,"Hai totalizzato %d punti", punti);
+            mvprintw(maxy/2, maxx/2-12,"Premi spazio per uscire");
+            timeout(100);
+            uscita=getch();
+            refresh();
+        }
 
     }
     //stampa di game over quando si vince.
@@ -582,12 +589,12 @@ void controllo(int pipein, int maxx, int maxy, int numNemici, int valoreDifficol
             mvprintw(maxy/2-10+i, maxx/2-50, youwon[i]);
         }
         attron(COLOR_PAIR(1));
-        while(exit!=32){
-        mvprintw(maxy/2-2, maxx/2-13,"Hai totalizzato %d punti", punti);
-        mvprintw(maxy/2, maxx/2-15,"Premi spazio per uscire");
-        timeout(100);
-        exit=getch();
-        refresh();
+        while(uscita!=32){
+            mvprintw(maxy/2-2, maxx/2-13,"Hai totalizzato %d punti", punti);
+            mvprintw(maxy/2, maxx/2-12,"Premi spazio per uscire");
+            timeout(100);
+            uscita=getch();
+            refresh();
         }
     }
 
@@ -601,14 +608,14 @@ void controllo(int pipein, int maxx, int maxy, int numNemici, int valoreDifficol
  */
 int menu(int maxx, int maxy){
     //nel caso in cui lo schermo sia troppo piccolo viene visualizzato questo messaggio
-    if(maxx<150 || maxy<30){
+    /*if(maxx<150 || maxy<30){
         while(1){
             mvprintw(1,1,"Risoluzione troppo bassa");
             mvprintw(2,1,"Prova a passare a schermo intero");
             mvprintw(3,1,"Ridimensiona e riesegui :(");
             refresh();
         }
-    }
+    }*/
     int isAnimationDone=0, scelta, numScelta=0, i, j=0;
     while(1){
         //stampa della linea superiore
@@ -622,6 +629,10 @@ int menu(int maxx, int maxy){
 
         //stampa del logo
         if(isAnimationDone==0){
+
+            /*if(scelta==32){
+                isAnimationDone=1;
+            }*/
 
             usleep(10000);
             for(i=8; i<15; i++){

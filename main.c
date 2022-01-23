@@ -87,7 +87,6 @@ int main() {
                 break;
         }
 
-
         j++;
         //aggiornamento delle coordinate iniziali del prossimo nemico da generare.
         y_nemici=y_nemici+15;

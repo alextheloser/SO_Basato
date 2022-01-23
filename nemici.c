@@ -19,7 +19,7 @@ void nemici(int pipeout, int x, int y, int idNemico, int maxx, int maxy){
     pos_nemico.id=idNemico;
     pos_nemico.pid=getpid();
     pid_t pid_bomba1, pid_bomba2;
-    int r=1, dirx, diry, cicli=1;
+    int r=1, dirx, diry, cicli=1, sigBomba1, sigBomba2;
 
     //scrivo nella pipe le informazioni iniziali.
     write(pipeout, &pos_nemico, sizeof(pos_nemico));
@@ -63,6 +63,8 @@ void nemici(int pipeout, int x, int y, int idNemico, int maxx, int maxy){
                     }
             }
         }
+        wait(&sigBomba1);
+        wait(&sigBomba2);
         //scrivo nella pipe le informazioni aggiornate.
         write(pipeout,&pos_nemico,sizeof(pos_nemico));
         //delay dello spostamento del nemico.
