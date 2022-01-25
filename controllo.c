@@ -608,10 +608,10 @@ void controllo(int pipein, int maxx, int maxy, int numNemici, int valoreDifficol
  */
 int menu(int maxx, int maxy){
     //nel caso in cui lo schermo sia troppo piccolo viene visualizzato questo messaggio
-    if(maxx<150 || maxy<30){
+    if(maxx<140 || maxy<20){
         while(1){
             mvprintw(1,1,"Risoluzione troppo bassa");
-            mvprintw(2,1,"Prova a passare a schermo intero");
+            mvprintw(2,1,"Risoluzione minima: 140(x) caratteri per 20(y) caratteri");
             mvprintw(3,1,"Ridimensiona e riesegui :(");
             refresh();
         }
