@@ -63,6 +63,7 @@ void nemici(int pipeout, int x, int y, int idNemico, int maxx, int maxy){
                     }
             }
         }
+        //aspetto la terminazione delle bombe.
         wait(&sigBomba1);
         wait(&sigBomba2);
         //scrivo nella pipe le informazioni aggiornate.

@@ -13,7 +13,6 @@ void controllo(int pipein, int maxx, int maxy, int numNemici, int valoreDifficol
 
 /**
  * Funzione principale nel quale vengono generati i processi.
- * @return
  */
 int main() {
     int filedes[2], i, j=0, maxx, maxy, x_nemici, y_nemici, numColonne=1, numNemici;

@@ -608,14 +608,14 @@ void controllo(int pipein, int maxx, int maxy, int numNemici, int valoreDifficol
  */
 int menu(int maxx, int maxy){
     //nel caso in cui lo schermo sia troppo piccolo viene visualizzato questo messaggio
-    /*if(maxx<150 || maxy<30){
+    if(maxx<150 || maxy<30){
         while(1){
             mvprintw(1,1,"Risoluzione troppo bassa");
             mvprintw(2,1,"Prova a passare a schermo intero");
             mvprintw(3,1,"Ridimensiona e riesegui :(");
             refresh();
         }
-    }*/
+    }
     int isAnimationDone=0, scelta, numScelta=0, i, j=0;
     while(1){
         //stampa della linea superiore
@@ -629,10 +629,6 @@ int menu(int maxx, int maxy){
 
         //stampa del logo
         if(isAnimationDone==0){
-
-            /*if(scelta==32){
-                isAnimationDone=1;
-            }*/
 
             usleep(10000);
             for(i=8; i<15; i++){
@@ -674,7 +670,6 @@ int menu(int maxx, int maxy){
             mvprintw(28, (maxx/2)-4, "Medio");
             mvprintw(29, (maxx/2)-4, "Difficile");
             mvprintw(30, (maxx/2)-4, "Esci");
-
 
             switch(scelta){
                 case KEY_UP:
