@@ -26,13 +26,13 @@ void navicella(int pipeout, int maxx, int maxy){
         switch(c) {
             //movimento verso l'alto.
             case KEY_UP:
-                if (pos_navicella.y > 3) {
+                if (pos_navicella.y > 2) {
                     pos_navicella.y--;
                 }
                 break;
             //movimento verso il basso.
             case KEY_DOWN:
-                if (pos_navicella.y < maxy - 4) {
+                if (pos_navicella.y < maxy - 3) {
                     pos_navicella.y++;
                 }
                 break;
