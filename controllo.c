@@ -195,7 +195,7 @@ void controllo(int pipein, int maxx, int maxy, int numNemici, int valoreDifficol
                             //elimino dallo schermo il missile e la bomba.
                             mvaddch(missili[n].y, missili[n].x, ' ');
                             //termino il processo che gestiva il missile.
-                            kill(missili[n].pid, 1);
+                            kill(missili[n].pid, SIGKILL);
                             //termino il processo che gestiva la bomba.
                             kill(bombe[i].pid, 1);
                             //imposto le coordnate del missile e della bomba fuori dallo schermo.
@@ -210,7 +210,7 @@ void controllo(int pipein, int maxx, int maxy, int numNemici, int valoreDifficol
                                 //elimino dallo schermo il missile e la bomba.
                                 mvaddch(missili[n].y, missili[n].x, ' ');
                                 //termino il processo che gestiva il missile.
-                                kill(missili[n].pid, 1);
+                                kill(missili[n].pid, SIGKILL);
                                 //termino il processo che gestiva la bomba.
                                 kill(bombeAvanzate[i].pid, 1);
                                 //imposto le coordnate del missile e della bomba fuori dallo schermo.
@@ -237,7 +237,7 @@ void controllo(int pipein, int maxx, int maxy, int numNemici, int valoreDifficol
                                 //elimino dallo schermo il missile.
                                 mvaddch(missili[n].y, missili[n].x, ' ');
                                 //termino il processo che gestiva il missile.
-                                kill(missili[n].pid, 1);
+                                kill(missili[n].pid, SIGKILL);
                                 //imposto le coordnate del missile dallo schermo.
                                 missili[n].x = -30;
                                 missili[n].y = -30;
@@ -284,7 +284,7 @@ void controllo(int pipein, int maxx, int maxy, int numNemici, int valoreDifficol
                                 //elimino dallo schermo il missile.
                                 mvaddch(missili[n].y, missili[n].x, ' ');
                                 //termino il processo che gestiva il missile.
-                                kill(missili[n].pid, 1);
+                                kill(missili[n].pid, SIGKILL);
                                 //imposto le coordnate del missile dallo schermo.
                                 missili[n].x = -30;
                                 missili[n].y = -30;
@@ -323,7 +323,7 @@ void controllo(int pipein, int maxx, int maxy, int numNemici, int valoreDifficol
                                 //elimino dallo schermo il missile.
                                 mvaddch(missili[n].y, missili[n].x, ' ');
                                 //termino il processo che gestiva il missile.
-                                kill(missili[n].pid, 1);
+                                kill(missili[n].pid, SIGKILL);
                                 //imposto le coordnate del missile dallo schermo.
                                 missili[n].x = -30;
                                 missili[n].y = -30;
@@ -362,7 +362,7 @@ void controllo(int pipein, int maxx, int maxy, int numNemici, int valoreDifficol
                                 //elimino dallo schermo il missile.
                                 mvaddch(missili[n].y, missili[n].x, ' ');
                                 //termino il processo che gestiva il missile.
-                                kill(missili[n].pid, 1);
+                                kill(missili[n].pid, SIGKILL);
                                 //imposto le coordnate del missile dallo schermo.
                                 missili[n].x = -30;
                                 missili[n].y = -30;
@@ -401,7 +401,7 @@ void controllo(int pipein, int maxx, int maxy, int numNemici, int valoreDifficol
                                 //elimino dallo schermo il missile.
                                 mvaddch(missili[n].y, missili[n].x, ' ');
                                 //termino il processo che gestiva il missile.
-                                kill(missili[n].pid, 1);
+                                kill(missili[n].pid, SIGKILL);
                                 //imposto le coordnate del missile dallo schermo.
                                 missili[n].x = -30;
                                 missili[n].y = -30;

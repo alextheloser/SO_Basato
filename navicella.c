@@ -64,21 +64,25 @@ void navicella(int pipeout, int maxx, int maxy){
                                 case 0:
                                     missile(pipeout, maxx, maxy, pos_navicella.x, pos_navicella.y, -PASSO);
                                 default:
+                                    sig1=0;
+                                    sig2=0;
                                     break;
                             }
                     }
                 }
                 break;
         }
+        //aspetto la terminazione dei processi missile.
         waitpid(pid_missile1,&sig1,WNOHANG);
         waitpid(pid_missile2,&sig2,WNOHANG);
-        if(WEXITSTATUS(sig1)==1){
+        //se sono terminati, imposto le variabili che mi consentono di sparare a 0.
+        if(sig1!=0){
             isMissileVivo1=0;
-            sig1=0;
+            usleep(1000);
         }
-        if(WEXITSTATUS(sig2)==2){
+        if(sig2!=0){
             isMissileVivo2=0;
-            sig2=0;
+            usleep(1000);
         }
         //scrivo nella pipe le informazioni aggiornate.
         write(pipeout,&pos_navicella,sizeof(pos_navicella));
@@ -129,11 +133,7 @@ void missile(int pipeout, int maxx, int maxy, int navx, int navy, int diry){
         usleep(DELAY_MISSILE);
     }
     //il processo viene terminato quando esce dal while.
-    if(pos_missile.id==0) {
-        exit(1);
-    }
-    else{
-        exit(2);
-    }
+
+    exit(SIGKILL);
 
 }
